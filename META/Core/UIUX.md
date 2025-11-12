@@ -2,44 +2,63 @@
 
 ## Design Philosophy
 
-**Core Principle**: *Calm Clarity with Purposeful Engagement*
+**Core Principle**: *Colorful Clarity for Enhanced Cognition*
 
-This is a **thinking tool**, not entertainment. The aesthetic should evoke the feeling of a well-organized workspace—focused, intentional, with everything having its place. Think: architect's desk, scientist's notebook, philosopher's study.
+This is a **thinking tool** that uses color strategically to enhance understanding. The aesthetic should feel like a vibrant, well-organized workspace where color communicates meaning, guides attention, and makes relationships visible at a glance. Think: scientific diagrams, information graphics, visual knowledge systems.
+
+**Color Philosophy**:
+- Color carries meaning (node types, relationships, states)
+- Bright, clear colors for immediate recognition
+- Light blue creates a calm, spacious foundation
+- Strategic use of the full spectrum for functional differentiation
 
 ---
 
 ## Visual Aesthetic
 
-### Color Palette: "Intellectual Serenity"
+### Color Palette: "Vibrant Knowledge Canvas"
+
+**Core Philosophy**: Use color strategically to communicate functionality, relationships, and states. Color is not decoration—it's information.
 
 **Primary Colors**:
-- **Background**: Warm off-white (#F8F7F4) - easier on eyes than pure white, suggests paper
-- **Graph Canvas**: Slightly darker warm gray (#EEECE8) - subtle differentiation from background
-- **Primary Accent**: Deep teal (#2C5F6F) - serious, contemplative, not distracting
-- **Secondary Accent**: Warm amber (#D4A574) - for highlights, adds warmth without childishness
+- **Background**: Soft light blue (#E8F4F8) - main canvas color, calm and spacious
+- **Graph Canvas**: Lighter blue-white (#F0F8FC) - subtle differentiation, maintains blue theme
+- **UI Chrome**: White (#FFFFFF) - panels, modals, cards for contrast
+- **Primary Accent**: Bright blue (#2196F3) - interactive elements, primary actions
+- **Dark Text**: Charcoal blue (#1A3A52) - for readability on light backgrounds
 
-**Graph-Specific Colors**:
-- **Nodes**: 
-  - Default: Soft slate blue (#7B92A8) with subtle gradient
-  - With notes: Warm amber border (#D4A574)
-  - Mastered (after quiz): Muted sage green (#8FA387)
-  - Needs review: Soft terracotta (#C89B7B)
-- **Edges**: 
-  - Default: Medium gray (#A8A8A8), 2px width
-  - Hover: Deep teal (#2C5F6F), 3px width
-  - Strong relationship: Darker, thicker
-  - Weak relationship: Lighter, thinner, dashed
+**Graph Node Colors** (Functional Color System):
+Each color communicates node type, state, or relationship strength:
 
-**Semantic Colors** (use sparingly):
-- Success/Correct: Muted sage (#8FA387) - not bright green
-- Error/Incorrect: Dusty rose (#C57B7B) - not alarming red
-- Warning/Review: Soft ochre (#DAB894)
+- **Root/Main Concepts**: Deep blue (#1565C0) - foundation concepts
+- **Supporting Concepts**: Medium blue (#42A5F5) - secondary ideas
+- **Examples/Applications**: Light cyan (#4DD0E1) - practical implementations
+- **Definitions**: Purple (#7E57C2) - terminology nodes
+- **Questions/Problems**: Orange (#FF9800) - areas needing exploration
+- **With Notes**: Gold border (#FFC107) - user has added notes
+- **Mastered (after quiz)**: Green (#66BB6A) - confirmed understanding
+- **Needs Review**: Red-orange (#FF7043) - requires attention
 
-**Why This Palette**: 
-- Warm neutrals reduce eye strain during long reading sessions
-- Muted sophistication signals "serious learning" not "gamified edu-tech"
-- Teal/amber combination has enough contrast without being jarring
-- Colors have meaning without being childish traffic lights
+**Edge Colors** (Relationship Type Indicators):
+- **Causal relationship** ("leads to", "causes"): Blue (#2196F3), solid, 3px
+- **Definitional** ("is a", "defines"): Purple (#9C27B0), solid, 2px
+- **Example of** ("such as"): Cyan (#00BCD4), dashed, 2px
+- **Contrasts with**: Orange (#FF9800), dotted, 2px
+- **Related to** (general): Gray (#90A4AE), solid, 2px
+- **Hover state**: Bright accent color + glow effect, 4px
+
+**Semantic Colors** (Clear, Bright Communication):
+- **Success/Correct**: Vibrant green (#4CAF50)
+- **Error/Incorrect**: Bright red (#F44336)
+- **Warning/Review**: Amber (#FFC107)
+- **Info/Neutral**: Blue (#2196F3)
+
+**Why This Palette**:
+- Light blue background creates calm, spacious feeling without being sterile
+- Color-coded nodes and edges make relationships instantly recognizable
+- Bright functional colors provide clear feedback and wayfinding
+- High contrast ensures readability and accessibility
+- Color meanings are intuitive and consistent throughout the app
 
 ---
 
@@ -405,16 +424,21 @@ Each tooltip:
 ## Dark Mode Considerations
 
 ### Color Adaptation:
-- Background: Deep charcoal (#1A1D23)
-- Graph canvas: Slightly lighter (#24272E)
-- Text: Warm off-white (#E8E6E3)
-- Nodes: Desaturated versions of light mode colors
-- Reduce contrast slightly (pure white on black is harsh)
+- Background: Deep blue-gray (#1A2332) - maintains blue theme
+- Graph canvas: Slightly lighter blue-gray (#2A3847)
+- Text: Soft white (#F0F4F8)
+- Nodes: Maintain vibrant colors but slightly desaturated for comfort
+  - Root concepts: Lighter blue (#42A5F5) instead of deep blue
+  - Supporting: Brighter cyan (#4DD0E1)
+  - Keep color meanings consistent across modes
+- UI Chrome: Dark blue (#283747)
+- Maintain color-coded relationships in darker tones
 
 ### When to Offer:
 - System preference auto-detect
 - Manual toggle in settings
 - Remember user preference
+- Keep functional color meanings consistent across both modes
 
 ---
 
@@ -462,14 +486,15 @@ For consistency across the app:
 
 ## Summary: Design Principles
 
-1. **Calm, Not Colorful**: Sophisticated neutrals with purposeful accents
-2. **Clear, Not Clever**: Direct communication over witty copy
-3. **Smooth, Not Showy**: Animations guide, don't entertain
-4. **Spacious, Not Sparse**: Generous whitespace aids focus
-5. **Serious, Not Stuffy**: Professional but approachable
-6. **Focused, Not Flashy**: Everything serves learning, nothing distracts
+1. **Colorful with Purpose**: Every color communicates function, type, or relationship
+2. **Light Blue Foundation**: Calm, spacious main color creates clarity without sterility
+3. **Visual Hierarchy**: Color guides attention and reveals structure instantly
+4. **Clear, Not Clever**: Direct communication over witty copy
+5. **Smooth, Not Showy**: Animations guide, don't entertain
+6. **Spacious, Not Sparse**: Generous whitespace aids focus
+7. **Vibrant, Not Overwhelming**: Strategic color use enhances, doesn't distract
 
-**Overall Feeling**: Walking into a beautiful, well-organized library where everything is designed to help you think deeply. The tool gets out of your way and lets the content shine, while providing just enough structure to enhance comprehension.
+**Overall Feeling**: Working with a vibrant knowledge visualization system where color makes meaning visible. Like a well-designed infographic or scientific diagram, the interface uses color to reveal patterns, relationships, and structure at a glance while maintaining a calm, focused atmosphere through the light blue foundation.
 
 ---
 
