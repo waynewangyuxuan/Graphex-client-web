@@ -2,32 +2,57 @@
  * Graph View Page
  *
  * Main application interface showing graph and reading panel side-by-side.
- * Implements Feature 2: Integrated Reading Interface.
+ * Implements Features 2, 3, 4, and 5:
+ * - Feature 2: Integrated Reading Interface (graph + reading panel sync)
+ * - Feature 3: Note-taking on nodes (NoteModal)
+ * - Feature 4: Pre-explanation retrieval on edges (ConnectionModal)
+ * - Feature 5: Comprehension quiz (QuizModal + QuizTriggerBanner)
  *
  * Features:
  * - Split view: Graph (60%) | Reading Panel (40%)
  * - Click node → jump to relevant section in reading panel
  * - Highlight corresponding passage in document
+ * - Node click → open NoteModal for note-taking
+ * - Edge click → open ConnectionModal for connection explanation
+ * - Track node interactions → trigger quiz banner after 5+ nodes
  * - Responsive layout (stacks on smaller screens)
  * - Loading and error states
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, use } from 'react';
 import { useGraph } from '@/hooks/useGraph';
 import { GraphContainer } from '@/components/graph';
 import { ReadingPanel } from '@/components/reading';
-import type { GraphNode } from '@/types/api.types';
+import { NoteModal } from '@/components/notes';
+import { ConnectionModal } from '@/components/connections';
+import { QuizModal, QuizTriggerBanner } from '@/components/quiz';
+import type { GraphNode, GraphEdge } from '@/types/api.types';
 
 // ============================================================================
 // Types
 // ============================================================================
 
 interface PageProps {
-  params: {
+  params: Promise<{
     graphId: string;
-  };
+  }>;
+}
+
+interface NoteModalState {
+  isOpen: boolean;
+  nodeId: string | null;
+  nodeTitle: string | null;
+}
+
+interface ConnectionModalState {
+  isOpen: boolean;
+  fromNodeId: string | null;
+  toNodeId: string | null;
+  fromNodeTitle: string | null;
+  toNodeTitle: string | null;
+  relationshipLabel: string | null;
 }
 
 // ============================================================================
@@ -39,49 +64,169 @@ interface PageProps {
  *
  * This is the core application interface where users interact with
  * the knowledge graph and read the source document.
+ *
+ * Integrates all modal features:
+ * - NoteModal for node note-taking
+ * - ConnectionModal for edge explanations
+ * - QuizModal for comprehension testing
+ * - QuizTriggerBanner for quiz promotion
  */
 export default function GraphViewPage({ params }: PageProps) {
-  const { graphId } = params;
+  // Unwrap params Promise (Next.js 15+ requirement)
+  const { graphId } = use(params);
 
   // Fetch graph data
   const { data: graph, isLoading, error } = useGraph(graphId);
 
-  // UI state
+  // Reading panel state
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
   const [highlightRange, setHighlightRange] = useState<{
     startOffset: number;
     endOffset: number;
   } | null>(null);
 
+  // Modal states
+  const [noteModalState, setNoteModalState] = useState<NoteModalState>({
+    isOpen: false,
+    nodeId: null,
+    nodeTitle: null,
+  });
+
+  const [connectionModalState, setConnectionModalState] =
+    useState<ConnectionModalState>({
+      isOpen: false,
+      fromNodeId: null,
+      toNodeId: null,
+      fromNodeTitle: null,
+      toNodeTitle: null,
+      relationshipLabel: null,
+    });
+
+  const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
+
+  // Quiz trigger state
+  const [interactedNodeIds, setInteractedNodeIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [showQuizBanner, setShowQuizBanner] = useState(false);
+  const [hasTriggeredBanner, setHasTriggeredBanner] = useState(false);
+
   /**
    * Handle node click in graph
-   * Updates active node and sets highlight range from documentRefs
+   * - Updates active node and highlight range for reading panel sync
+   * - Opens NoteModal for note-taking
+   * - Tracks interactions for quiz trigger
    */
-  const handleNodeClick = (nodeId: string) => {
-    setActiveNodeId(nodeId);
+  const handleNodeClick = useCallback(
+    (nodeId: string) => {
+      // Update reading panel state
+      setActiveNodeId(nodeId);
 
-    // Find node's document reference
-    const node = graph?.nodes.find((n) => n.id === nodeId);
-    if (node?.documentRefs?.[0]) {
-      const ref = node.documentRefs[0];
-      setHighlightRange({
-        startOffset: ref.start,
-        endOffset: ref.end,
+      // Find node's document reference
+      const node = graph?.nodes.find((n) => n.id === nodeId);
+      if (node?.documentRefs?.[0]) {
+        const ref = node.documentRefs[0];
+        setHighlightRange({
+          startOffset: ref.start,
+          endOffset: ref.end,
+        });
+      } else {
+        // Clear highlight if node has no refs
+        setHighlightRange(null);
+      }
+
+      // Open NoteModal
+      setNoteModalState({
+        isOpen: true,
+        nodeId,
+        nodeTitle: node?.title || null,
       });
-    } else {
-      // Clear highlight if node has no refs
-      setHighlightRange(null);
-    }
-  };
+
+      // Track interaction for quiz trigger
+      setInteractedNodeIds((prev) => {
+        const updated = new Set(prev);
+        updated.add(nodeId);
+
+        // Trigger banner when 5+ unique nodes clicked (only once)
+        if (updated.size >= 5 && !hasTriggeredBanner) {
+          setShowQuizBanner(true);
+          setHasTriggeredBanner(true);
+        }
+
+        return updated;
+      });
+    },
+    [graph?.nodes, hasTriggeredBanner]
+  );
 
   /**
    * Handle edge click in graph
-   * For now, just log. Future: open connection modal
+   * Opens ConnectionModal with edge details
    */
-  const handleEdgeClick = (edgeId: string) => {
-    console.log('Edge clicked:', edgeId);
-    // TODO: Feature 4 - Pre-explanation retrieval modal
-  };
+  const handleEdgeClick = useCallback(
+    (edgeId: string) => {
+      if (!graph) return;
+
+      // Find the edge
+      const edge = graph.edges.find((e) => e.id === edgeId);
+      if (!edge) return;
+
+      // Find the from/to nodes
+      const fromNode = graph.nodes.find((n) => n.id === edge.fromNodeId);
+      const toNode = graph.nodes.find((n) => n.id === edge.toNodeId);
+
+      if (!fromNode || !toNode) return;
+
+      // Open ConnectionModal
+      setConnectionModalState({
+        isOpen: true,
+        fromNodeId: edge.fromNodeId,
+        toNodeId: edge.toNodeId,
+        fromNodeTitle: fromNode.title,
+        toNodeTitle: toNode.title,
+        relationshipLabel: edge.relationship,
+      });
+    },
+    [graph]
+  );
+
+  /**
+   * Handle quiz trigger banner actions
+   */
+  const handleStartQuiz = useCallback(() => {
+    setShowQuizBanner(false);
+    setIsQuizModalOpen(true);
+  }, []);
+
+  const handleDismissBanner = useCallback(() => {
+    setShowQuizBanner(false);
+  }, []);
+
+  /**
+   * Close modal handlers
+   */
+  const handleCloseNoteModal = useCallback(() => {
+    setNoteModalState({
+      isOpen: false,
+      nodeId: null,
+      nodeTitle: null,
+    });
+  }, []);
+
+  const handleCloseConnectionModal = useCallback(() => {
+    setConnectionModalState({
+      isOpen: false,
+      fromNodeId: null,
+      toNodeId: null,
+      fromNodeTitle: null,
+      toNodeTitle: null,
+      relationshipLabel: null,
+    });
+  }, []);
+
+  const handleCloseQuizModal = useCallback(() => {
+    setIsQuizModalOpen(false);
+  }, []);
 
   // Loading state - show skeleton for both panels
   if (isLoading) {
@@ -310,6 +455,56 @@ export default function GraphViewPage({ params }: PageProps) {
         Press Tab to navigate between elements. Press Enter or Space to interact
         with nodes. Press Escape to close modals.
       </div>
+
+      {/* Quiz Trigger Banner - Fixed at top when triggered */}
+      <QuizTriggerBanner
+        isVisible={showQuizBanner}
+        onStart={handleStartQuiz}
+        onDismiss={handleDismissBanner}
+        interactionCount={interactedNodeIds.size}
+      />
+
+      {/* Feature 3: Note Modal - Opens when node is clicked */}
+      {noteModalState.nodeId && (
+        <NoteModal
+          isOpen={noteModalState.isOpen}
+          onClose={handleCloseNoteModal}
+          graphId={graphId}
+          nodeId={noteModalState.nodeId}
+          nodeTitle={noteModalState.nodeTitle || undefined}
+        />
+      )}
+
+      {/* Feature 4: Connection Modal - Opens when edge is clicked */}
+      {connectionModalState.fromNodeId && connectionModalState.toNodeId && (
+        <ConnectionModal
+          isOpen={connectionModalState.isOpen}
+          onClose={handleCloseConnectionModal}
+          graphId={graphId}
+          fromNodeId={connectionModalState.fromNodeId}
+          toNodeId={connectionModalState.toNodeId}
+          fromNodeTitle={connectionModalState.fromNodeTitle || ''}
+          toNodeTitle={connectionModalState.toNodeTitle || ''}
+          relationshipLabel={connectionModalState.relationshipLabel || undefined}
+        />
+      )}
+
+      {/* Feature 5: Quiz Modal - Opens when user starts quiz */}
+      <QuizModal
+        isOpen={isQuizModalOpen}
+        onClose={handleCloseQuizModal}
+        graphId={graphId}
+        questionCount={5}
+        difficulty="medium"
+        onComplete={(results) => {
+          console.log('Quiz completed:', results);
+        }}
+        onViewNode={(nodeId) => {
+          // Close quiz and highlight the node
+          setIsQuizModalOpen(false);
+          handleNodeClick(nodeId);
+        }}
+      />
     </div>
   );
 }

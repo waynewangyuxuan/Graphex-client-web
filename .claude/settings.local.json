@@ -20,7 +20,12 @@
       "Bash(kill:*)",
       "Bash(rm:*)",
       "Bash(npx msw:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(pnpm msw:*)",
+      "Bash(npx eslint:*)",
+      "Bash(pnpm dev)"
     ],
     "deny": [],
     "ask": []

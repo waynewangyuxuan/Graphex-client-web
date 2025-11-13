@@ -15,14 +15,14 @@ export default function ComponentPreviewPage() {
   const { toast } = useToast();
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold text-neutral-900">
+          <h1 className="text-4xl font-bold text-text-primary">
             Component Preview
           </h1>
-          <p className="text-neutral-600">
+          <p className="text-text-secondary">
             Showcase of all UI components in the Graphex design system
           </p>
         </div>
@@ -56,14 +56,27 @@ export default function ComponentPreviewPage() {
         {/* Badges Section */}
         <Card className="p-6 space-y-4 border-2 border-neutral-200">
           <h2 className="text-2xl font-semibold text-neutral-900">Badges</h2>
-          <div className="flex flex-wrap gap-4">
-            <Badge variant="default">Default</Badge>
-            <Badge variant="primary">Primary</Badge>
-            <Badge variant="secondary">Secondary</Badge>
-            <Badge variant="success">Success</Badge>
-            <Badge variant="warning">Warning</Badge>
-            <Badge variant="error">Error</Badge>
-            <Badge variant="outline">Outline</Badge>
+          <p className="text-sm text-text-secondary mb-4">Node State & Semantic Badges</p>
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-3">
+              <Badge variant="default">Default</Badge>
+              <Badge variant="with-notes">With Notes</Badge>
+              <Badge variant="mastered">Mastered</Badge>
+              <Badge variant="needs-review">Needs Review</Badge>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Badge variant="root">Root Node</Badge>
+              <Badge variant="supporting">Supporting</Badge>
+              <Badge variant="example">Example</Badge>
+              <Badge variant="definition">Definition</Badge>
+              <Badge variant="question">Question</Badge>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Badge variant="success">Success</Badge>
+              <Badge variant="error">Error</Badge>
+              <Badge variant="warning">Warning</Badge>
+              <Badge variant="info">Info</Badge>
+            </div>
           </div>
         </Card>
 
@@ -105,18 +118,20 @@ export default function ComponentPreviewPage() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Progress Bar
+                Progress Bar ({progress}%)
               </label>
-              <Progress value={progress} max={100} />
+              <Progress value={progress} showPercentage />
               <div className="flex gap-2 mt-4">
                 <Button
                   size="sm"
+                  variant="secondary"
                   onClick={() => setProgress(Math.max(0, progress - 10))}
                 >
                   -10%
                 </Button>
                 <Button
                   size="sm"
+                  variant="secondary"
                   onClick={() => setProgress(Math.min(100, progress + 10))}
                 >
                   +10%
@@ -152,6 +167,7 @@ export default function ComponentPreviewPage() {
           </h2>
           <div className="flex flex-wrap gap-4">
             <Button
+              variant="success"
               onClick={() =>
                 toast({
                   title: 'Success!',
@@ -163,6 +179,7 @@ export default function ComponentPreviewPage() {
               Success Toast
             </Button>
             <Button
+              variant="error"
               onClick={() =>
                 toast({
                   title: 'Error',
@@ -174,6 +191,7 @@ export default function ComponentPreviewPage() {
               Error Toast
             </Button>
             <Button
+              variant="warning"
               onClick={() =>
                 toast({
                   title: 'Warning',
@@ -185,6 +203,7 @@ export default function ComponentPreviewPage() {
               Warning Toast
             </Button>
             <Button
+              variant="primary"
               onClick={() =>
                 toast({
                   title: 'Info',
