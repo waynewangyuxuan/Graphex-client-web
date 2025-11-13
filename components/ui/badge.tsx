@@ -39,7 +39,7 @@ const badgeVariants = cva(
           'bg-node-supporting/20 text-blue-800 border border-node-supporting',
         example: 'bg-node-example/20 text-cyan-900 border border-node-example',
         definition:
-          'bg-node-definition/20 text-purple-900 border border-node-definition',
+          'bg-node-definition/20 text-teal-900 border border-node-definition',
         question:
           'bg-node-question/20 text-orange-900 border border-node-question',
         // Semantic variants

@@ -27,7 +27,7 @@
 | [TODO.md](/META/Core/TODO.md) | **Next tasks** | Integration steps, testing, polish, future features |
 
 **Key Insights:**
-- **MVP Status**: ✅ All 5 features complete! (graph → read → note → explain → test)
+- **MVP Status**: [COMPLETE] All 5 features complete! (graph → read → note → explain → test)
 - **Stack**: Next.js 14 App Router, TypeScript, Tailwind, Radix UI, Zustand (UI state), React Query (server state)
 - **Testing**: 80% unit, 15% integration, 5% E2E
 - **Design**: Vibrant, colorful with light blue foundation - "Colorful Clarity for Enhanced Cognition"
@@ -159,20 +159,20 @@ Task(subagent_type: "Explore", prompt: "...", thoroughness: "medium")
 ## Critical Rules
 
 ### Always
-✅ Read MVP.md first (know priorities)
-✅ Follow TECHNICAL.md patterns (consistent architecture)
-✅ Adhere to REGULATION.md (atomic structure, test first, clean code)
-✅ Match UIUX.md design (colors, spacing, interactions)
-✅ Test comprehensively (80% unit coverage)
-✅ Use sub-agents proactively (leverage expertise)
+- Read MVP.md first (know priorities)
+- Follow TECHNICAL.md patterns (consistent architecture)
+- Adhere to REGULATION.md (atomic structure, test first, clean code)
+- Match UIUX.md design (colors, spacing, interactions)
+- Test comprehensively (80% unit coverage)
+- Use sub-agents proactively (leverage expertise)
 
 ### Never
-❌ Build features not in MVP.md without approval
-❌ Skip tests
-❌ Create multi-purpose files
-❌ Leave commented code or unused imports
-❌ Ignore TECHNICAL.md architecture
-❌ Deviate from UIUX.md design system
+- Build features not in MVP.md without approval
+- Skip tests
+- Create multi-purpose files
+- Leave commented code or unused imports
+- Ignore TECHNICAL.md architecture
+- Deviate from UIUX.md design system
 
 ---
 
@@ -189,7 +189,7 @@ Task(subagent_type: "Explore", prompt: "...", thoroughness: "medium")
 
 ## Current Status (2025-01-12)
 
-### ✅ Completed
+### Completed
 - **Infrastructure**: All hooks, API client, MSW mock server
 - **Design System**: Colorful with light blue foundation (updated from warm neutrals)
 - **UI Library**: 10 base components (Button, Card, Dialog, Input, etc.)
@@ -199,7 +199,7 @@ Task(subagent_type: "Explore", prompt: "...", thoroughness: "medium")
 - **Feature 4**: Pre-explanation retrieval (hypothesis → AI explanation)
 - **Feature 5**: Quiz with comprehension checks
 
-### 🚀 Next Steps
+### Next Steps
 See [TODO.md](/META/Core/TODO.md) for:
 1. MSW setup and verification
 2. Component integration and wiring

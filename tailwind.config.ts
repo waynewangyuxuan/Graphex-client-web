@@ -42,7 +42,7 @@ const config: Config = {
           root: '#1565C0', // Deep blue - foundation concepts
           supporting: '#42A5F5', // Medium blue - secondary ideas
           example: '#4DD0E1', // Light cyan - practical implementations
-          definition: '#7E57C2', // Purple - terminology nodes
+          definition: '#00897B', // Teal - terminology nodes
           question: '#FF9800', // Orange - areas needing exploration
         },
 
@@ -56,7 +56,7 @@ const config: Config = {
         // Edge/relationship type colors
         edge: {
           causal: '#2196F3', // Blue - "leads to", "causes"
-          definitional: '#9C27B0', // Purple - "is a", "defines"
+          definitional: '#00897B', // Teal - "is a", "defines"
           example: '#00BCD4', // Cyan - "such as"
           contrast: '#FF9800', // Orange - "contrasts with"
           related: '#90A4AE', // Gray - general relationship

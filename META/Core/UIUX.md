@@ -33,7 +33,7 @@ Each color communicates node type, state, or relationship strength:
 - **Root/Main Concepts**: Deep blue (#1565C0) - foundation concepts
 - **Supporting Concepts**: Medium blue (#42A5F5) - secondary ideas
 - **Examples/Applications**: Light cyan (#4DD0E1) - practical implementations
-- **Definitions**: Purple (#7E57C2) - terminology nodes
+- **Definitions**: Teal (#00897B) - terminology nodes
 - **Questions/Problems**: Orange (#FF9800) - areas needing exploration
 - **With Notes**: Gold border (#FFC107) - user has added notes
 - **Mastered (after quiz)**: Green (#66BB6A) - confirmed understanding
@@ -41,7 +41,7 @@ Each color communicates node type, state, or relationship strength:
 
 **Edge Colors** (Relationship Type Indicators):
 - **Causal relationship** ("leads to", "causes"): Blue (#2196F3), solid, 3px
-- **Definitional** ("is a", "defines"): Purple (#9C27B0), solid, 2px
+- **Definitional** ("is a", "defines"): Teal (#00897B), solid, 2px
 - **Example of** ("such as"): Cyan (#00BCD4), dashed, 2px
 - **Contrasts with**: Orange (#FF9800), dotted, 2px
 - **Related to** (general): Gray (#90A4AE), solid, 2px

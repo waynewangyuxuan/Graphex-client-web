@@ -58,7 +58,7 @@ Use these to communicate what **kind** of concept a node represents:
 // Examples/applications - light cyan
 <div className="bg-node-example">
 
-// Definitions/terminology - purple
+// Definitions/terminology - teal
 <div className="bg-node-definition">
 
 // Questions/problems to explore - orange
@@ -130,7 +130,7 @@ Use these to show **what type of relationship** connects two nodes:
 // Causal relationship ("leads to", "causes") - blue, solid, 3px
 <line stroke="text-edge-causal" strokeWidth="3" />
 
-// Definitional ("is a", "defines") - purple, solid, 2px
+// Definitional ("is a", "defines") - teal, solid, 2px
 <line stroke="text-edge-definitional" strokeWidth="2" />
 
 // Example ("such as") - cyan, dashed, 2px
@@ -148,7 +148,7 @@ Use these to show **what type of relationship** connects two nodes:
 ```typescript
 const edgeColors = {
   causal: '#2196F3',      // Blue
-  definitional: '#9C27B0', // Purple
+  definitional: '#00897B', // Teal
   example: '#00BCD4',      // Cyan
   contrast: '#FF9800',     // Orange
   related: '#90A4AE',      // Gray

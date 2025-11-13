@@ -88,7 +88,7 @@ Based on `tailwind.config.ts` and UIUX.md design system:
 | Root | Deep Blue | #1565C0 | Foundation concepts |
 | Supporting | Medium Blue | #42A5F5 | Secondary ideas |
 | Example | Light Cyan | #4DD0E1 | Practical applications |
-| Definition | Purple | #7E57C2 | Terminology nodes |
+| Definition | Teal | #00897B | Terminology nodes |
 | Question | Orange | #FF9800 | Areas to explore |
 
 ### Node State Colors (Overlays)
@@ -106,7 +106,7 @@ Based on `tailwind.config.ts` and UIUX.md design system:
 | Type | Color | Hex | Style |
 |------|-------|-----|-------|
 | Causal | Blue | #2196F3 | Solid 3px |
-| Definitional | Purple | #9C27B0 | Solid 2px |
+| Definitional | Teal | #00897B | Solid 2px |
 | Example | Cyan | #00BCD4 | Dashed 2px |
 | Contrast | Orange | #FF9800 | Dotted 2px |
 | Related | Gray | #90A4AE | Solid 2px |

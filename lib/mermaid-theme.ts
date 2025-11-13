@@ -16,7 +16,7 @@ export const NODE_TYPE_COLORS = {
   root: '#1565C0', // Deep blue - foundation concepts
   supporting: '#42A5F5', // Medium blue - secondary ideas
   example: '#4DD0E1', // Light cyan - practical implementations
-  definition: '#7E57C2', // Purple - terminology nodes
+  definition: '#00897B', // Teal - terminology nodes
   question: '#FF9800', // Orange - areas needing exploration
   default: '#42A5F5', // Medium blue - default for unknown types
 } as const;
@@ -35,7 +35,7 @@ export const NODE_STATE_COLORS = {
  */
 export const EDGE_TYPE_COLORS = {
   causal: '#2196F3', // Blue - "leads to", "causes"
-  definitional: '#9C27B0', // Purple - "is a", "defines"
+  definitional: '#00897B', // Teal - "is a", "defines"
   example: '#00BCD4', // Cyan - "such as"
   contrast: '#FF9800', // Orange - "contrasts with"
   related: '#90A4AE', // Gray - general relationship
@@ -115,7 +115,7 @@ export function getMermaidTheme(options?: {
       // Tertiary colors
       tertiaryColor: NODE_TYPE_COLORS.definition,
       tertiaryTextColor: '#FFFFFF',
-      tertiaryBorderColor: '#7E57C2',
+      tertiaryBorderColor: '#00897B',
 
       // Edge/line colors
       lineColor: EDGE_TYPE_COLORS.related, // Gray for default edges
