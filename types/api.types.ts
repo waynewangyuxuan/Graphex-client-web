@@ -72,31 +72,35 @@ export type DocumentStatus = 'processing' | 'ready' | 'failed';
 
 /**
  * Complete document object
+ * Matches backend GET /api/v1/documents/:id response
  */
 export interface Document {
   id: string;
   title: string;
-  contentText: string;
+  content: string; // Full extracted text from PDF/document
   sourceType: DocumentSourceType;
-  sourceUrl?: string;
-  fileSize?: number;
   status: DocumentStatus;
-  createdAt: string;
-  updatedAt: string;
+  metadata: {
+    fileSize: number;
+    quality: {
+      score: number;
+    };
+    images?: unknown[];
+  };
 }
 
 /**
  * Document upload response (after file upload)
+ * Matches backend POST /api/v1/documents response
  */
 export interface DocumentUploadResponse {
-  document: {
-    id: string;
-    title: string;
-    sourceType: DocumentSourceType;
-    status: DocumentStatus;
-    createdAt: string;
-  };
-  jobId: string;
+  id: string;
+  title: string;
+  sourceType: DocumentSourceType;
+  status: DocumentStatus;
+  fileSize: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
@@ -127,23 +131,26 @@ export interface DocumentStatusResponse {
 export type GraphStatus = 'ready' | 'processing' | 'failed';
 
 /**
- * Document reference within a node
+ * Document reference within a node (source reference)
+ * Matches backend sourceReferences structure
  */
 export interface DocumentReference {
-  start: number;
-  end: number;
-  text: string;
+  start: number; // Character position in document.content
+  end: number; // Character position in document.content
+  text: string; // Actual text snippet
 }
 
 /**
  * Graph node
+ * Matches backend node structure in GET /api/v1/graphs/:id
  */
 export interface GraphNode {
   id: string;
-  nodeKey: string; // Mermaid node key (e.g., "A", "B", "C")
   title: string;
-  contentSnippet: string;
-  documentRefs: DocumentReference[];
+  nodeType: string; // e.g., "concept"
+  summary: string; // 2-sentence summary
+  sourceReferences: DocumentReference[]; // Changed from documentRefs to match backend
+  nodeKey?: string; // Mermaid node key (e.g., "A", "B", "C") - optional, for compatibility
 }
 
 /**
@@ -159,32 +166,39 @@ export interface GraphEdge {
 
 /**
  * Complete graph object
+ * Matches backend GET /api/v1/graphs/:id response
  */
 export interface Graph {
   id: string;
   documentId: string;
-  mermaidCode: string;
-  status: GraphStatus;
-  generationModel: string;
   nodes: GraphNode[];
   edges: GraphEdge[];
-  createdAt: string;
+  mermaidCode: string;
+  status: 'ready' | 'processing' | 'failed';
 }
 
 /**
  * Graph generation request
+ * Supports both document ID and direct text
  */
 export interface GraphGenerationRequest {
-  documentId: string;
+  documentId?: string; // Mode A: From uploaded document
+  documentText?: string; // Mode B: Direct text (backward compatible)
+  documentTitle?: string; // Optional for Mode B
 }
 
 /**
- * Graph generation response (async job started)
+ * Graph generation response (synchronous in real backend)
+ * Matches backend POST /api/v1/graphs/generate response
  */
 export interface GraphGenerationResponse {
-  jobId: string;
-  status: JobStatus;
-  estimatedTime: string;
+  graphId: string;
+  status: 'completed' | 'failed';
+  nodeCount: number;
+  edgeCount: number;
+  qualityScore: number;
+  cost: number;
+  processingTimeMs: number;
 }
 
 // ============================================================================

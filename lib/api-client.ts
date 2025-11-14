@@ -14,9 +14,10 @@ import type { APIErrorResponse, APISuccessResponse } from '@/types/api.types';
 
 /**
  * API base URL from environment variable
+ * Default to backend running on port 4000
  */
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
 /**
  * Default request timeout (30 seconds)

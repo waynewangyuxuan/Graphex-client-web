@@ -124,8 +124,8 @@ export default function GraphViewPage({ params }: PageProps) {
 
       // Find node's document reference
       const node = graph?.nodes.find((n) => n.id === nodeId);
-      if (node?.documentRefs?.[0]) {
-        const ref = node.documentRefs[0];
+      if (node?.sourceReferences?.[0]) {
+        const ref = node.sourceReferences[0];
         setHighlightRange({
           startOffset: ref.start,
           endOffset: ref.end,

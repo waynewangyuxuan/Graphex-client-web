@@ -195,7 +195,7 @@ export function ReadingPanel({
           className="max-w-prose mx-auto"
         >
           <DocumentViewer
-            content={document.contentText}
+            content={document.content}
             highlightRange={highlightRange}
           />
         </div>

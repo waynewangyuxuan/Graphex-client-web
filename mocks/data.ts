@@ -20,11 +20,12 @@ export const mockTimestamp = () => new Date().toISOString();
 
 /**
  * Mock document with realistic content
+ * Matches backend GET /api/v1/documents/:id schema
  */
 export const mockDocument = {
   id: 'doc_abc123',
   title: 'Active Learning Strategies in Education',
-  contentText: `Active Learning: A Comprehensive Overview
+  content: `Active Learning: A Comprehensive Overview
 
 Active learning is an educational approach that involves students in the learning process more directly than passive methods such as lectures. It emphasizes student engagement, critical thinking, and the application of knowledge.
 
@@ -63,10 +64,14 @@ Conclusion:
 
 Active learning represents a paradigm shift from teacher-centered to student-centered education, with substantial research support for its effectiveness in promoting deep learning and retention.`,
   sourceType: 'pdf' as const,
-  fileSize: 1048576,
   status: 'ready' as const,
-  createdAt: '2025-11-11T10:00:00Z',
-  updatedAt: '2025-11-11T10:05:00Z',
+  metadata: {
+    fileSize: 1048576,
+    quality: {
+      score: 85,
+    },
+    images: [],
+  },
 };
 
 /**
@@ -92,8 +97,9 @@ export const mockGraph = {
       id: 'node_1',
       nodeKey: 'A',
       title: 'Active Learning',
-      contentSnippet: 'An educational approach that involves students in the learning process more directly than passive methods.',
-      documentRefs: [
+      nodeType: 'concept',
+      summary: 'An educational approach that involves students in the learning process more directly than passive methods.',
+      sourceReferences: [
         {
           start: 0,
           end: 186,
@@ -105,8 +111,9 @@ export const mockGraph = {
       id: 'node_2',
       nodeKey: 'B',
       title: 'Engagement',
-      contentSnippet: 'Students participate actively rather than passively receiving information.',
-      documentRefs: [
+      nodeType: 'concept',
+      summary: 'Students participate actively rather than passively receiving information.',
+      sourceReferences: [
         {
           start: 250,
           end: 450,
@@ -118,8 +125,9 @@ export const mockGraph = {
       id: 'node_3',
       nodeKey: 'C',
       title: 'Retention',
-      contentSnippet: 'Active learning improves long-term retention of information.',
-      documentRefs: [
+      nodeType: 'concept',
+      summary: 'Active learning improves long-term retention of information.',
+      sourceReferences: [
         {
           start: 455,
           end: 650,
@@ -131,8 +139,9 @@ export const mockGraph = {
       id: 'node_4',
       nodeKey: 'D',
       title: 'Understanding',
-      contentSnippet: 'Promotes deeper understanding rather than surface-level memorization.',
-      documentRefs: [
+      nodeType: 'concept',
+      summary: 'Promotes deeper understanding rather than surface-level memorization.',
+      sourceReferences: [
         {
           start: 655,
           end: 850,
@@ -144,8 +153,9 @@ export const mockGraph = {
       id: 'node_5',
       nodeKey: 'E',
       title: 'Critical Thinking',
-      contentSnippet: 'Students develop critical thinking skills that transfer beyond specific content.',
-      documentRefs: [
+      nodeType: 'concept',
+      summary: 'Students develop critical thinking skills that transfer beyond specific content.',
+      sourceReferences: [
         {
           start: 855,
           end: 1050,
@@ -157,8 +167,9 @@ export const mockGraph = {
       id: 'node_6',
       nodeKey: 'F',
       title: 'Mastery',
-      contentSnippet: 'Through repeated practice and feedback, students achieve mastery of concepts.',
-      documentRefs: [
+      nodeType: 'concept',
+      summary: 'Through repeated practice and feedback, students achieve mastery of concepts.',
+      sourceReferences: [
         {
           start: 1055,
           end: 1250,
@@ -170,8 +181,9 @@ export const mockGraph = {
       id: 'node_7',
       nodeKey: 'G',
       title: 'Student Participation',
-      contentSnippet: 'Direct involvement in the learning process through various activities.',
-      documentRefs: [
+      nodeType: 'concept',
+      summary: 'Direct involvement in the learning process through various activities.',
+      sourceReferences: [
         {
           start: 250,
           end: 450,
@@ -183,8 +195,9 @@ export const mockGraph = {
       id: 'node_8',
       nodeKey: 'H',
       title: 'Deep Learning',
-      contentSnippet: 'Student-centered education promoting deep learning and retention.',
-      documentRefs: [
+      nodeType: 'concept',
+      summary: 'Student-centered education promoting deep learning and retention.',
+      sourceReferences: [
         {
           start: 1800,
           end: 2000,
