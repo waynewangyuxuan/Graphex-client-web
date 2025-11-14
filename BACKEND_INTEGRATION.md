@@ -391,7 +391,22 @@ curl http://localhost:4000/api/v1/documents/doc-123
 
 **Cause**: Backend not configured to accept requests from frontend
 
-**Fix**: Ensure backend has CORS middleware configured for `http://localhost:3000`
+**Error Message**: `Error: Not allowed by CORS` in backend logs
+
+**Fix**: Update backend CORS configuration to allow `http://localhost:3000`
+
+In your backend `src/middleware/cors.middleware.ts`:
+```typescript
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',  // Frontend dev server
+    'http://100.64.40.181:3000',  // Network access (optional)
+  ],
+  credentials: true,
+};
+```
+
+After updating, restart your backend server.
 
 ### Issue: API returns 404
 
