@@ -74,9 +74,16 @@ export function useGraph(
     'queryKey' | 'queryFn'
   >
 ) {
+  console.log('[useGraph] Called with graphId:', graphId);
+
   return useQuery<Graph, NormalizedAPIError>({
     queryKey: graphKeys.detail(graphId),
-    queryFn: () => getGraph(graphId),
+    queryFn: async () => {
+      console.log('[useGraph] Fetching graph:', graphId);
+      const result = await getGraph(graphId);
+      console.log('[useGraph] Received graph:', result?.id);
+      return result;
+    },
     enabled: !!graphId,
     staleTime: 5 * 60 * 1000, // 5 minutes - graphs don't change after generation
     cacheTime: 10 * 60 * 1000, // 10 minutes
@@ -132,22 +139,19 @@ export function useGenerateGraph(
     NormalizedAPIError,
     GraphGenerationRequest
   >({
-    mutationFn: (request) => generateGraph(request),
+    mutationFn: (request) => {
+      console.log('[useGenerateGraph] Starting graph generation:', request);
+      return generateGraph(request);
+    },
     onSuccess: (data) => {
-      // Optimistically set initial job status
-      queryClient.setQueryData(
-        jobKeys.status(data.jobId),
-        {
-          id: data.jobId,
-          type: 'graph-generation',
-          status: 'queued',
-          progress: 0,
-          result: null,
-          error: null,
-          createdAt: new Date().toISOString(),
-          completedAt: null,
-        } as JobStatusResponse
-      );
+      console.log('[useGenerateGraph] Graph generation completed:', data);
+      // Graph generation is synchronous, so we can invalidate graph queries immediately
+      if (data.graphId) {
+        queryClient.invalidateQueries({ queryKey: graphKeys.detail(data.graphId) });
+      }
+    },
+    onError: (error) => {
+      console.error('[useGenerateGraph] Graph generation failed:', error);
     },
     retry: false, // Don't retry graph generation requests
     ...options,

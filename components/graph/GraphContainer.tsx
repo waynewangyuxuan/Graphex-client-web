@@ -178,6 +178,16 @@ export function GraphContainer({
   emptyMessage,
   className = '',
 }: GraphContainerProps) {
+  console.log('[GraphContainer] Rendering:', {
+    graphId,
+    hasMermaidCode: !!mermaidCode,
+    mermaidCodeLength: mermaidCode?.length,
+    nodeCount: nodes?.length,
+    edgeCount: edges?.length,
+    isLoading,
+    hasError: !!error
+  });
+
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panEnabled, setPanEnabled] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -224,6 +234,7 @@ export function GraphContainer({
 
   // Show loading state
   if (isLoading) {
+    console.log('[GraphContainer] Showing loading skeleton');
     return (
       <div className={`relative w-full h-full ${className}`}>
         <GraphSkeleton />
@@ -233,6 +244,7 @@ export function GraphContainer({
 
   // Show error state
   if (error) {
+    console.log('[GraphContainer] Showing error state:', error);
     const errorMessage =
       typeof error === 'string' ? error : error.message || 'An error occurred';
     return (
@@ -244,6 +256,7 @@ export function GraphContainer({
 
   // Show empty state
   if (!mermaidCode || nodes.length === 0) {
+    console.log('[GraphContainer] Showing empty state - mermaidCode:', !!mermaidCode, 'nodes:', nodes?.length);
     return (
       <div className={`relative w-full h-full ${className}`}>
         <GraphEmpty message={emptyMessage} />
@@ -252,6 +265,7 @@ export function GraphContainer({
   }
 
   // Render graph with controls
+  console.log('[GraphContainer] Rendering MermaidGraph component');
   return (
     <div
       ref={containerRef}

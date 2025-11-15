@@ -99,10 +99,10 @@ export function DocumentUploadForm({
       });
 
       // Call optional callback
-      onUploadSuccess?.(data.document.id);
+      onUploadSuccess?.(data.id);
 
       // Redirect to processing page
-      router.push(`/processing?docId=${data.document.id}`);
+      router.push(`/processing?docId=${data.id}`);
     },
     onError: (error) => {
       toast({

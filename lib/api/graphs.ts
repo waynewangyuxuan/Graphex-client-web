@@ -59,7 +59,10 @@ export async function generateGraph(
  * ```
  */
 export async function getGraph(graphId: string): Promise<Graph> {
-  return apiClient.get<never, Graph>(`/graphs/${graphId}`);
+  console.log('[getGraph] Requesting graph:', graphId);
+  const result = await apiClient.get<never, Graph>(`/graphs/${graphId}`);
+  console.log('[getGraph] Response received:', result?.id, 'nodes:', result?.nodes?.length);
+  return result;
 }
 
 // ============================================================================

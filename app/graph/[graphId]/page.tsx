@@ -75,8 +75,18 @@ export default function GraphViewPage({ params }: PageProps) {
   // Unwrap params Promise (Next.js 15+ requirement)
   const { graphId } = use(params);
 
+  console.log('[GraphViewPage] Rendering with graphId:', graphId);
+
   // Fetch graph data
   const { data: graph, isLoading, error } = useGraph(graphId);
+
+  console.log('[GraphViewPage] Query state:', {
+    graphId,
+    isLoading,
+    hasGraph: !!graph,
+    hasError: !!error,
+    errorMessage: error?.message
+  });
 
   // Reading panel state
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
@@ -124,8 +134,8 @@ export default function GraphViewPage({ params }: PageProps) {
 
       // Find node's document reference
       const node = graph?.nodes.find((n) => n.id === nodeId);
-      if (node?.sourceReferences?.[0]) {
-        const ref = node.sourceReferences[0];
+      if (node?.documentRefs?.[0]) {
+        const ref = node.documentRefs[0];
         setHighlightRange({
           startOffset: ref.start,
           endOffset: ref.end,
@@ -171,19 +181,14 @@ export default function GraphViewPage({ params }: PageProps) {
       const edge = graph.edges.find((e) => e.id === edgeId);
       if (!edge) return;
 
-      // Find the from/to nodes
-      const fromNode = graph.nodes.find((n) => n.id === edge.fromNodeId);
-      const toNode = graph.nodes.find((n) => n.id === edge.toNodeId);
-
-      if (!fromNode || !toNode) return;
-
+      // Edge now contains fromNode/toNode with title already
       // Open ConnectionModal
       setConnectionModalState({
         isOpen: true,
-        fromNodeId: edge.fromNodeId,
-        toNodeId: edge.toNodeId,
-        fromNodeTitle: fromNode.title,
-        toNodeTitle: toNode.title,
+        fromNodeId: edge.from,
+        toNodeId: edge.to,
+        fromNodeTitle: edge.fromNode.title,
+        toNodeTitle: edge.toNode.title,
         relationshipLabel: edge.relationship,
       });
     },
@@ -439,7 +444,7 @@ export default function GraphViewPage({ params }: PageProps) {
           aria-label="Document reading panel"
         >
           <ReadingPanel
-            documentId={graph.documentId}
+            documentId={graph.document.id}
             activeNodeId={activeNodeId}
             highlightRange={highlightRange}
           />

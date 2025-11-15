@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDocumentStatus } from '@/hooks/useDocument';
+import { useGenerateGraph } from '@/hooks/useGraph';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -10,17 +11,15 @@ import { Spinner } from '@/components/ui/spinner';
 import { FileText, AlertCircle, ArrowLeft } from 'lucide-react';
 
 /**
- * Document Processing Status Page
+ * Document Processing & Graph Generation Page
  *
  * Route: /processing?docId={documentId}
  *
- * Functionality:
- * - Poll document status using useDocumentStatus hook (polls every 2 seconds)
- * - Display progress with animated progress bar
- * - Show status messages based on processing progress
- * - Redirect to /graph/{graphId} when status is 'ready'
- * - Show error message with retry option when status is 'failed'
- * - Handle missing docId or document not found errors
+ * Workflow:
+ * 1. Wait for document to be ready
+ * 2. Trigger graph generation
+ * 3. Show progress while generating (20-30 seconds)
+ * 4. Redirect to /graph/{graphId} when complete
  *
  * Server/Client Boundary:
  * - Client Component (needs useSearchParams, useRouter, React Query)
@@ -31,24 +30,35 @@ export default function ProcessingPage() {
   const searchParams = useSearchParams();
   const docId = searchParams.get('docId');
 
-  // Track if we've already redirected (prevent double redirect)
-  const [hasRedirected, setHasRedirected] = useState(false);
+  // Track if we've started generation
+  const [hasStartedGeneration, setHasStartedGeneration] = useState(false);
 
   // Poll document status (automatically polls every 2s while processing)
-  const { data: status, error, isError, isLoading } = useDocumentStatus(docId || '', {
-    enabled: !!docId, // Only fetch if docId exists
+  const { data: status, error: docError, isError: isDocError, isLoading } = useDocumentStatus(docId || '', {
+    enabled: !!docId,
   });
 
-  // Redirect to graph when ready
+  // Graph generation mutation
+  const generateGraph = useGenerateGraph({
+    onSuccess: (data) => {
+      console.log('[Processing] Graph generated:', data.graphId);
+      // Redirect to graph page with the graph ID
+      router.push(`/graph/${data.graphId}`);
+    },
+    onError: (error) => {
+      console.error('[Processing] Graph generation failed:', error);
+    },
+  });
+
+  // Trigger graph generation when document is ready
   useEffect(() => {
-    if (status?.status === 'ready' && !hasRedirected) {
-      setHasRedirected(true);
-      // The backend processes the document and creates a graph
-      // We use the documentId to fetch the graph (API will return the associated graph)
-      // The graph page will handle fetching the actual graph data
-      router.push(`/graph/${docId}`);
+    if (status?.status === 'ready' && docId && !hasStartedGeneration && !generateGraph.isPending) {
+      console.log('[Processing] Document ready, starting graph generation');
+      setHasStartedGeneration(true);
+      generateGraph.mutate({ documentId: docId });
     }
-  }, [status, router, docId, hasRedirected]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status?.status, docId, hasStartedGeneration, generateGraph.isPending]);
 
   // Get status message based on progress
   const getStatusMessage = (progress: number): string => {
@@ -90,12 +100,15 @@ export default function ProcessingPage() {
     );
   }
 
-  // Handle document not found or other errors
-  if (isError) {
+  // Handle errors (document or graph generation)
+  const error = docError || generateGraph.error;
+  const isError = isDocError || generateGraph.isError;
+
+  if (isError && error) {
     const errorMessage =
       error?.code === 'DOCUMENT_NOT_FOUND'
         ? 'This document could not be found. It may have been deleted or the link is invalid.'
-        : error?.message || 'An unexpected error occurred while checking document status.';
+        : error?.message || 'An unexpected error occurred.';
 
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
@@ -177,9 +190,15 @@ export default function ProcessingPage() {
     );
   }
 
-  // Processing state (status is 'processing')
-  const progress = status.progress || 0;
-  const statusMessage = getStatusMessage(progress);
+  // Determine current stage and progress
+  const isGeneratingGraph = hasStartedGeneration && generateGraph.isPending;
+  const documentProgress = status.progress || 0;
+
+  // Show 0-50% for document processing, 50-100% for graph generation
+  const progress = isGeneratingGraph ? 75 : Math.min(documentProgress, 50);
+  const statusMessage = isGeneratingGraph
+    ? 'Generating knowledge graph...'
+    : getStatusMessage(documentProgress);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
@@ -191,11 +210,12 @@ export default function ProcessingPage() {
               <FileText className="h-8 w-8 text-primary" />
             </div>
             <h1 className="mb-2 text-2xl font-bold text-text-primary">
-              Processing Your Document
+              {isGeneratingGraph ? 'Generating Knowledge Graph' : 'Processing Your Document'}
             </h1>
             <p className="text-sm text-text-secondary">
-              This usually takes 30-60 seconds. We're analyzing your content and
-              building a knowledge graph.
+              {isGeneratingGraph
+                ? 'This usually takes 20-30 seconds. Creating nodes, edges, and relationships.'
+                : 'Extracting and analyzing your document content.'}
             </p>
           </div>
 
@@ -218,9 +238,9 @@ export default function ProcessingPage() {
                   {statusMessage}
                 </p>
                 <p className="mt-1 text-xs text-text-secondary">
-                  {progress < 50
-                    ? 'Extracting and analyzing document content'
-                    : 'Generating knowledge graph and relationships'}
+                  {isGeneratingGraph
+                    ? 'Analyzing concepts and building graph structure'
+                    : 'Preparing document for graph generation'}
                 </p>
               </div>
             </div>

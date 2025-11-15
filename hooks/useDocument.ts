@@ -148,7 +148,7 @@ export function useDocumentStatus(
  * const [uploadProgress, setUploadProgress] = useState(0);
  * const uploadMutation = useUploadDocument({
  *   onSuccess: (data) => {
- *     router.push(`/processing?docId=${data.document.id}`);
+ *     router.push(`/processing?docId=${data.id}`);
  *   }
  * });
  *
@@ -185,11 +185,16 @@ export function useUploadDocument(
   >({
     mutationFn: ({ file, title, config }) => uploadDocument(file, title, config),
     onSuccess: (data) => {
+      // Debug: Log the actual response structure
+      console.log('[useUploadDocument] Response data:', data);
+      console.log('[useUploadDocument] Document ID:', data.id);
+      console.log('[useUploadDocument] Status:', data.status);
+
       // Optimistically set initial document status
       queryClient.setQueryData(
-        documentKeys.status(data.document.id),
+        documentKeys.status(data.id),
         {
-          id: data.document.id,
+          id: data.id,
           status: 'processing',
           progress: 0,
           errorMessage: null,
@@ -215,7 +220,7 @@ export function useUploadDocument(
  * ```typescript
  * const uploadFromUrlMutation = useUploadDocumentFromUrl({
  *   onSuccess: (data) => {
- *     router.push(`/processing?docId=${data.document.id}`);
+ *     router.push(`/processing?docId=${data.id}`);
  *   },
  *   onError: (error) => {
  *     toast.error(error.message);
@@ -245,9 +250,9 @@ export function useUploadDocumentFromUrl(
     onSuccess: (data) => {
       // Optimistically set initial document status
       queryClient.setQueryData(
-        documentKeys.status(data.document.id),
+        documentKeys.status(data.id),
         {
-          id: data.document.id,
+          id: data.id,
           status: 'processing',
           progress: 0,
           errorMessage: null,

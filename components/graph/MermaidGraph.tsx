@@ -99,12 +99,22 @@ export function MermaidGraph({
   enableZoom = true,
   initialZoom = 1.0,
 }: MermaidGraphProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  console.log('[MermaidGraph] Component rendered:', {
+    graphId,
+    hasMermaidCode: !!mermaidCode,
+    mermaidCodeLength: mermaidCode?.length,
+    nodeCount: nodes?.length
+  });
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const svgContainerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
   const [isRendered, setIsRendered] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+
+  console.log('[MermaidGraph] State:', { isRendered, hasError: !!renderError });
 
   /**
    * Initialize Mermaid with our custom theme
@@ -122,24 +132,40 @@ export function MermaidGraph({
    * Render the Mermaid graph
    */
   const renderGraph = useCallback(async () => {
-    if (!containerRef.current || !mermaidCode) return;
+    console.log('[MermaidGraph] renderGraph called:', {
+      hasContainer: !!svgContainerRef.current,
+      hasWrapper: !!wrapperRef.current,
+      hasMermaidCode: !!mermaidCode,
+      mermaidCodeLength: mermaidCode?.length
+    });
+
+    if (!svgContainerRef.current || !mermaidCode) {
+      console.log('[MermaidGraph] Skipping render - no container or code');
+      return;
+    }
 
     try {
+      console.log('[MermaidGraph] Starting render...');
       setRenderError(null);
       setIsRendered(false);
 
       // Generate unique ID for this render
       const elementId = `mermaid-${graphId}-${Date.now()}`;
+      console.log('[MermaidGraph] Generated element ID:', elementId);
 
       // Render Mermaid graph
+      console.log('[MermaidGraph] Calling mermaid.render...');
       const { svg } = await mermaid.render(elementId, mermaidCode);
+      console.log('[MermaidGraph] Mermaid render complete, SVG length:', svg?.length);
 
-      // Insert SVG into container
-      if (containerRef.current) {
-        containerRef.current.innerHTML = svg;
+      // Insert SVG into dedicated container (not React-managed)
+      if (svgContainerRef.current) {
+        svgContainerRef.current.innerHTML = svg;
 
         // Get reference to SVG element
-        const svgElement = containerRef.current.querySelector('svg');
+        const svgElement = svgContainerRef.current.querySelector('svg');
+        console.log('[MermaidGraph] SVG element found:', !!svgElement);
+
         if (svgElement) {
           svgRef.current = svgElement;
 
@@ -151,16 +177,17 @@ export function MermaidGraph({
           svgElement.style.height = '100%';
 
           // Fit to container
-          if (containerRef.current) {
-            const { clientWidth, clientHeight } = containerRef.current;
+          if (wrapperRef.current) {
+            const { clientWidth, clientHeight } = wrapperRef.current;
             fitGraphToContainer(svgElement, clientWidth, clientHeight);
           }
 
+          console.log('[MermaidGraph] Setting isRendered to true');
           setIsRendered(true);
         }
       }
     } catch (error) {
-      console.error('Failed to render Mermaid graph:', error);
+      console.error('[MermaidGraph] Render error:', error);
       setRenderError(
         error instanceof Error ? error.message : 'Failed to render graph'
       );
@@ -237,6 +264,7 @@ export function MermaidGraph({
    * Render graph when mermaidCode changes
    */
   useEffect(() => {
+    console.log('[MermaidGraph] useEffect triggered - calling renderGraph');
     renderGraph();
   }, [renderGraph]);
 
@@ -244,11 +272,11 @@ export function MermaidGraph({
    * Handle window resize - re-fit graph
    */
   useEffect(() => {
-    if (!isRendered || !svgRef.current || !containerRef.current) return;
+    if (!isRendered || !svgRef.current || !wrapperRef.current) return;
 
     const handleResize = () => {
-      if (svgRef.current && containerRef.current) {
-        const { clientWidth, clientHeight } = containerRef.current;
+      if (svgRef.current && wrapperRef.current) {
+        const { clientWidth, clientHeight } = wrapperRef.current;
         fitGraphToContainer(svgRef.current, clientWidth, clientHeight);
       }
     };
@@ -281,32 +309,33 @@ export function MermaidGraph({
     );
   }
 
-  // Render loading state
-  if (!isRendered) {
-    return (
-      <div
-        className={`flex items-center justify-center h-full bg-canvas ${className}`}
-        role="status"
-        aria-live="polite"
-      >
-        <div className="text-center">
-          <div className="animate-pulse">
-            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <div className="text-text-secondary">Rendering graph...</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Render graph
+  // Render container
   return (
     <div
-      ref={containerRef}
+      ref={wrapperRef}
       className={`w-full h-full bg-canvas overflow-hidden ${className}`}
-      role="img"
-      aria-label={`Knowledge graph with ${nodes.length} concepts and ${edges.length} connections`}
-    />
+      role={isRendered ? "img" : "status"}
+      aria-label={isRendered ? `Knowledge graph with ${nodes.length} concepts and ${edges.length} connections` : undefined}
+      aria-live={isRendered ? undefined : "polite"}
+    >
+      {/* Show loading state while rendering */}
+      {!isRendered && (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <div className="text-text-secondary">Rendering graph...</div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* SVG container - managed via direct DOM manipulation */}
+      <div
+        ref={svgContainerRef}
+        className="w-full h-full"
+        style={{ display: isRendered ? 'block' : 'none' }}
+      />
+    </div>
   );
 }
 

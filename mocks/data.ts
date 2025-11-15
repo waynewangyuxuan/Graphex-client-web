@@ -79,7 +79,7 @@ Active learning represents a paradigm shift from teacher-centered to student-cen
  */
 export const mockGraph = {
   id: 'graph_abc123',
-  documentId: 'doc_abc123',
+  status: 'ready' as const,
   mermaidCode: `graph TD
   A[Active Learning] --> B[Engagement]
   A --> C[Retention]
@@ -90,186 +90,178 @@ export const mockGraph = {
   E --> F[Mastery]
   B --> G[Student Participation]
   D --> H[Deep Learning]`,
-  status: 'ready' as const,
   generationModel: 'claude-sonnet-4',
+  version: 1,
+  createdAt: '2025-01-12T10:00:00.000Z',
+  document: {
+    id: 'doc_abc123',
+    title: 'Active Learning Research',
+    sourceType: 'pdf',
+    createdAt: '2025-01-12T09:30:00.000Z',
+  },
   nodes: [
     {
       id: 'node_1',
       nodeKey: 'A',
       title: 'Active Learning',
+      contentSnippet: 'An educational approach that involves students...',
       nodeType: 'concept',
       summary: 'An educational approach that involves students in the learning process more directly than passive methods.',
-      sourceReferences: [
+      documentRefs: [
         {
           start: 0,
           end: 186,
           text: 'Active learning is an educational approach that involves students in the learning process more directly than passive methods such as lectures. It emphasizes student engagement, critical thinking, and the application of knowledge.',
         },
       ],
+      position: { x: null, y: null },
+      metadata: null,
     },
     {
       id: 'node_2',
       nodeKey: 'B',
       title: 'Engagement',
+      contentSnippet: 'Research-based educational concept...',
       nodeType: 'concept',
       summary: 'Students participate actively rather than passively receiving information.',
-      sourceReferences: [
+      documentRefs: [
         {
           start: 250,
           end: 450,
           text: 'Students participate actively rather than passively receiving information. This can include discussions, problem-solving, case studies, and hands-on activities.',
         },
       ],
+      position: { x: null, y: null },
+      metadata: null,
     },
     {
       id: 'node_3',
       nodeKey: 'C',
       title: 'Retention',
+      contentSnippet: 'Research-based educational concept...',
       nodeType: 'concept',
       summary: 'Active learning improves long-term retention of information.',
-      sourceReferences: [
+      documentRefs: [
         {
           start: 455,
           end: 650,
           text: 'Research shows that active learning improves long-term retention of information. When students engage with material through multiple modalities, they create stronger neural connections.',
         },
       ],
+      position: { x: null, y: null },
+      metadata: null,
     },
     {
       id: 'node_4',
       nodeKey: 'D',
       title: 'Understanding',
+      contentSnippet: 'Research-based educational concept...',
       nodeType: 'concept',
       summary: 'Promotes deeper understanding rather than surface-level memorization.',
-      sourceReferences: [
+      documentRefs: [
         {
           start: 655,
           end: 850,
           text: 'Active learning promotes deeper understanding rather than surface-level memorization. Students construct knowledge by connecting new information to existing mental models.',
         },
       ],
+      position: { x: null, y: null },
+      metadata: null,
     },
     {
       id: 'node_5',
       nodeKey: 'E',
       title: 'Critical Thinking',
+      contentSnippet: 'Research-based educational concept...',
       nodeType: 'concept',
       summary: 'Students develop critical thinking skills that transfer beyond specific content.',
-      sourceReferences: [
+      documentRefs: [
         {
           start: 855,
           end: 1050,
           text: 'By grappling with problems and questions, students develop critical thinking skills that transfer beyond the specific content being learned.',
         },
       ],
+      position: { x: null, y: null },
+      metadata: null,
     },
     {
       id: 'node_6',
       nodeKey: 'F',
       title: 'Mastery',
+      contentSnippet: 'Research-based educational concept...',
       nodeType: 'concept',
       summary: 'Through repeated practice and feedback, students achieve mastery of concepts.',
-      sourceReferences: [
+      documentRefs: [
         {
           start: 1055,
           end: 1250,
           text: 'Through repeated practice and feedback, students achieve mastery of concepts and skills. This iterative process builds confidence and competence.',
         },
       ],
+      position: { x: null, y: null },
+      metadata: null,
     },
     {
       id: 'node_7',
       nodeKey: 'G',
       title: 'Student Participation',
+      contentSnippet: 'Research-based educational concept...',
       nodeType: 'concept',
       summary: 'Direct involvement in the learning process through various activities.',
-      sourceReferences: [
+      documentRefs: [
         {
           start: 250,
           end: 450,
           text: 'Students participate actively rather than passively receiving information. This can include discussions, problem-solving, case studies, and hands-on activities.',
         },
       ],
+      position: { x: null, y: null },
+      metadata: null,
     },
     {
       id: 'node_8',
       nodeKey: 'H',
       title: 'Deep Learning',
+      contentSnippet: 'Research-based educational concept...',
       nodeType: 'concept',
       summary: 'Student-centered education promoting deep learning and retention.',
-      sourceReferences: [
+      documentRefs: [
         {
           start: 1800,
           end: 2000,
           text: 'Active learning represents a paradigm shift from teacher-centered to student-centered education, with substantial research support for its effectiveness in promoting deep learning and retention.',
         },
       ],
+      position: { x: null, y: null },
+      metadata: null,
     },
   ],
   edges: [
     {
       id: 'edge_1',
-      fromNodeId: 'node_1',
-      toNodeId: 'node_2',
+      from: 'node_1',
+      to: 'node_2',
+      fromNode: {
+        nodeKey: 'A',
+        title: 'Active Learning',
+      },
+      toNode: {
+        nodeKey: 'B',
+        title: 'Engagement',
+      },
       relationship: 'leads to',
       aiExplanation: null,
+      strength: null,
     },
-    {
-      id: 'edge_2',
-      fromNodeId: 'node_1',
-      toNodeId: 'node_3',
-      relationship: 'results in',
-      aiExplanation: null,
-    },
-    {
-      id: 'edge_3',
-      fromNodeId: 'node_1',
-      toNodeId: 'node_4',
-      relationship: 'promotes',
-      aiExplanation: null,
-    },
-    {
-      id: 'edge_4',
-      fromNodeId: 'node_2',
-      toNodeId: 'node_5',
-      relationship: 'develops',
-      aiExplanation: null,
-    },
-    {
-      id: 'edge_5',
-      fromNodeId: 'node_3',
-      toNodeId: 'node_5',
-      relationship: 'supports',
-      aiExplanation: null,
-    },
-    {
-      id: 'edge_6',
-      fromNodeId: 'node_4',
-      toNodeId: 'node_5',
-      relationship: 'enables',
-      aiExplanation: null,
-    },
-    {
-      id: 'edge_7',
-      fromNodeId: 'node_5',
-      toNodeId: 'node_6',
-      relationship: 'leads to',
-      aiExplanation: null,
-    },
-    {
-      id: 'edge_8',
-      fromNodeId: 'node_2',
-      toNodeId: 'node_7',
-      relationship: 'includes',
-      aiExplanation: null,
-    },
-    {
-      id: 'edge_9',
-      fromNodeId: 'node_4',
-      toNodeId: 'node_8',
-      relationship: 'achieves',
-      aiExplanation: null,
-    },
+    { id: 'edge_2', from: 'node_1', to: 'node_3', fromNode: { nodeKey: 'A', title: 'Active Learning' }, toNode: { nodeKey: 'C', title: 'Retention' }, relationship: 'results in', aiExplanation: null, strength: null, metadata: null },
+    { id: 'edge_3', from: 'node_1', to: 'node_4', fromNode: { nodeKey: 'A', title: 'Active Learning' }, toNode: { nodeKey: 'D', title: 'Understanding' }, relationship: 'promotes', aiExplanation: null, strength: null, metadata: null },
+    { id: 'edge_4', from: 'node_2', to: 'node_5', fromNode: { nodeKey: 'B', title: 'Engagement' }, toNode: { nodeKey: 'E', title: 'Critical Thinking' }, relationship: 'develops', aiExplanation: null, strength: null, metadata: null },
+    { id: 'edge_5', from: 'node_3', to: 'node_5', fromNode: { nodeKey: 'C', title: 'Retention' }, toNode: { nodeKey: 'E', title: 'Critical Thinking' }, relationship: 'supports', aiExplanation: null, strength: null, metadata: null },
+    { id: 'edge_6', from: 'node_4', to: 'node_5', fromNode: { nodeKey: 'D', title: 'Understanding' }, toNode: { nodeKey: 'E', title: 'Critical Thinking' }, relationship: 'enables', aiExplanation: null, strength: null, metadata: null },
+    { id: 'edge_7', from: 'node_5', to: 'node_6', fromNode: { nodeKey: 'E', title: 'Critical Thinking' }, toNode: { nodeKey: 'F', title: 'Mastery' }, relationship: 'leads to', aiExplanation: null, strength: null, metadata: null },
+    { id: 'edge_8', from: 'node_2', to: 'node_7', fromNode: { nodeKey: 'B', title: 'Engagement' }, toNode: { nodeKey: 'G', title: 'Student Participation' }, relationship: 'includes', aiExplanation: null, strength: null, metadata: null },
+    { id: 'edge_9', from: 'node_4', to: 'node_8', fromNode: { nodeKey: 'D', title: 'Understanding' }, toNode: { nodeKey: 'H', title: 'Deep Learning' }, relationship: 'achieves', aiExplanation: null, strength: null, metadata: null },
   ],
   createdAt: '2025-11-11T10:00:00Z',
 };

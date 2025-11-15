@@ -33,24 +33,42 @@ export function GraphViewWithConnectionModal() {
       nodeKey: 'A',
       title: 'Active Learning',
       contentSnippet: 'Active learning involves...',
+      nodeType: 'concept',
+      summary: 'Active learning is a teaching method that engages students.',
       documentRefs: [],
+      position: { x: null, y: null },
+      metadata: null,
     },
     {
       id: 'node_2',
       nodeKey: 'B',
       title: 'Long-term Retention',
       contentSnippet: 'Long-term retention is...',
+      nodeType: 'concept',
+      summary: 'Long-term retention refers to the ability to remember information over time.',
       documentRefs: [],
+      position: { x: null, y: null },
+      metadata: null,
     },
   ];
 
   const exampleEdges: GraphEdge[] = [
     {
       id: 'edge_1',
-      fromNodeId: 'node_1',
-      toNodeId: 'node_2',
+      from: 'node_1',
+      to: 'node_2',
+      fromNode: {
+        nodeKey: 'A',
+        title: 'Active Learning',
+      },
+      toNode: {
+        nodeKey: 'B',
+        title: 'Long-term Retention',
+      },
       relationship: 'leads to',
       aiExplanation: null,
+      strength: null,
+      metadata: null,
     },
   ];
 
@@ -62,19 +80,14 @@ export function GraphViewWithConnectionModal() {
     const edge = exampleEdges.find((e) => e.id === edgeId);
     if (!edge) return;
 
-    // Find the connected nodes
-    const fromNode = exampleNodes.find((n) => n.id === edge.fromNodeId);
-    const toNode = exampleNodes.find((n) => n.id === edge.toNodeId);
-
-    if (!fromNode || !toNode) return;
-
+    // Edge now contains fromNode/toNode with title already
     // Open modal with connection details
     setConnectionModal({
       isOpen: true,
-      fromNodeId: edge.fromNodeId,
-      toNodeId: edge.toNodeId,
-      fromNodeTitle: fromNode.title,
-      toNodeTitle: toNode.title,
+      fromNodeId: edge.from,
+      toNodeId: edge.to,
+      fromNodeTitle: edge.fromNode.title,
+      toNodeTitle: edge.toNode.title,
       relationshipLabel: edge.relationship,
     });
   };
@@ -98,18 +111,15 @@ export function GraphViewWithConnectionModal() {
         {/* Simplified edge representation */}
         <div className="space-y-4">
           {exampleEdges.map((edge) => {
-            const fromNode = exampleNodes.find((n) => n.id === edge.fromNodeId);
-            const toNode = exampleNodes.find((n) => n.id === edge.toNodeId);
-
             return (
               <button
                 key={edge.id}
                 onClick={() => handleEdgeClick(edge.id)}
                 className="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
               >
-                <span className="font-medium">{fromNode?.title}</span>
+                <span className="font-medium">{edge.fromNode.title}</span>
                 <span className="text-primary text-sm">→ {edge.relationship}</span>
-                <span className="font-medium">{toNode?.title}</span>
+                <span className="font-medium">{edge.toNode.title}</span>
               </button>
             );
           })}

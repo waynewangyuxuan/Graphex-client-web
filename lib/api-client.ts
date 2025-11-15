@@ -91,16 +91,27 @@ apiClient.interceptors.response.use(
         requestId: response.config.headers['X-Request-ID'],
         timestamp: new Date().toISOString(),
       });
+      console.log('[API Response Data]', response.data);
     }
 
-    // Extract data directly from standardized response format
-    // This allows React Query hooks to work with data directly
-    if (response.data && response.data.success === true) {
-      return response.data.data as any;
+    // Handle standardized response format with success wrapper
+    // MSW format: { success: true, data: {...}, meta: {...} }
+    if (response.data && typeof response.data === 'object' && 'success' in response.data) {
+      if (response.data.success === true && 'data' in response.data) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[API Unwrapped Data]', response.data.data);
+        }
+        return response.data.data as any;
+      }
     }
 
-    // Return full response if not in standard format (edge case)
-    return response;
+    // Handle direct response format (real backend without wrapper)
+    // Real backend format: { document: {...}, jobId: "..." }
+    // Return the data directly
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[API Direct Data]', response.data);
+    }
+    return response.data;
   },
   async (error: AxiosError<APIErrorResponse>) => {
     // Handle 429 Rate Limit with exponential backoff

@@ -91,17 +91,16 @@ export interface Document {
 
 /**
  * Document upload response (after file upload)
- * Matches backend POST /api/v1/documents response
+ * Matches ACTUAL backend POST /api/v1/documents response
  */
 export interface DocumentUploadResponse {
-  document: {
-    id: string;
-    title: string;
-    sourceType: DocumentSourceType;
-    status: DocumentStatus;
-    createdAt: string;
-  };
-  jobId: string;
+  id: string; // Document ID
+  title: string;
+  sourceType: string; // 'pdf', 'text', 'markdown', 'url'
+  status: string; // 'ready', 'processing', 'failed'
+  fileSize: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
@@ -143,39 +142,61 @@ export interface DocumentReference {
 
 /**
  * Graph node
- * Matches backend node structure in GET /api/v1/graphs/:id
+ * Matches backend node structure in GET /api/v1/graphs/:id from FRONTEND_INTEGRATION.md
  */
 export interface GraphNode {
   id: string;
+  nodeKey: string; // Mermaid node key (e.g., "0_A", "0_B")
   title: string;
-  nodeType: string; // e.g., "concept"
+  contentSnippet: string; // Brief content preview
+  nodeType: string; // e.g., "method", "concept"
   summary: string; // 2-sentence summary
-  sourceReferences: DocumentReference[]; // Changed from documentRefs to match backend
-  nodeKey?: string; // Mermaid node key (e.g., "A", "B", "C") - optional, for compatibility
+  documentRefs: DocumentReference[] | null; // Source references (null if none)
+  position: { x: number | null; y: number | null }; // Visual position
+  metadata: Record<string, unknown> | null; // Additional metadata
 }
 
 /**
  * Graph edge
+ * Matches backend edge structure in GET /api/v1/graphs/:id from FRONTEND_INTEGRATION.md
  */
 export interface GraphEdge {
   id: string;
-  fromNodeId: string;
-  toNodeId: string;
+  from: string; // ID of source node
+  to: string; // ID of target node
+  fromNode: {
+    nodeKey: string;
+    title: string;
+  };
+  toNode: {
+    nodeKey: string;
+    title: string;
+  };
   relationship: string;
   aiExplanation: string | null;
+  strength: number | null; // Connection strength
+  metadata: Record<string, unknown> | null; // Additional metadata
 }
 
 /**
  * Complete graph object
- * Matches backend GET /api/v1/graphs/:id response
+ * Matches backend GET /api/v1/graphs/:id response from FRONTEND_INTEGRATION.md
  */
 export interface Graph {
   id: string;
-  documentId: string;
+  status: 'ready' | 'processing' | 'failed';
+  mermaidCode: string;
+  generationModel: string; // e.g., "claude-sonnet-4"
+  version: number;
+  createdAt: string;
+  document: {
+    id: string;
+    title: string;
+    sourceType: string;
+    createdAt: string;
+  };
   nodes: GraphNode[];
   edges: GraphEdge[];
-  mermaidCode: string;
-  status: 'ready' | 'processing' | 'failed';
 }
 
 /**
@@ -190,7 +211,7 @@ export interface GraphGenerationRequest {
 
 /**
  * Graph generation response (synchronous in real backend)
- * Matches backend POST /api/v1/graphs/generate response
+ * Matches backend POST /api/v1/graphs/generate response from FRONTEND_INTEGRATION.md
  */
 export interface GraphGenerationResponse {
   graphId: string;
@@ -200,6 +221,7 @@ export interface GraphGenerationResponse {
   qualityScore: number;
   cost: number;
   processingTimeMs: number;
+  warnings: string[];
 }
 
 // ============================================================================

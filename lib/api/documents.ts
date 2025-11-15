@@ -30,7 +30,7 @@ import type {
  * const response = await uploadDocument(file, 'My Document', {
  *   onUploadProgress: (progress) => console.log(`${progress}%`)
  * });
- * console.log(response.document.id); // "doc_abc123"
+ * console.log(response.id); // "doc_abc123"
  * ```
  */
 export async function uploadDocument(

@@ -45,21 +45,38 @@ This tracker serves as a log of what we need to do in the next iteration of deve
 
 #### End-to-End Flow
 - [x] Upload page → Processing page flow working
-- [ ] Processing page → Graph page flow (requires graph page update)
-- [ ] Complete user journey testing
+- [x] Processing page → Graph page flow (complete with graph generation)
+- [x] Complete user journey testing (end-to-end functional)
+
+### ✅ Completed (Session 3 - 2025-11-15)
+
+#### Backend API Integration
+- [x] Fixed API type definitions to match actual backend responses
+- [x] Corrected DocumentUploadResponse (flat structure with `id` field)
+- [x] Updated GraphNode interface (nodeKey required, documentRefs, contentSnippet)
+- [x] Updated GraphEdge interface (from/to fields, embedded node info)
+- [x] Fixed all hooks to use correct field references
+
+#### Graph Generation Workflow
+- [x] Added graph generation trigger in processing page
+- [x] Implemented proper useEffect dependencies
+- [x] Fixed redirect flow: Upload → Processing → Graph Generation → Graph Display
+- [x] Added comprehensive debug logging throughout stack
+
+#### Graph Rendering
+- [x] Fixed MermaidGraph ref timing issues
+- [x] Separated React-managed DOM from direct DOM manipulation
+- [x] Resolved React removeChild errors
+- [x] Graph now renders successfully end-to-end
 
 ### 📋 Next Tasks
 
-#### Graph Page Integration
-- [ ] Ensure graph page accepts document ID parameter
-- [ ] Test redirect from processing page to graph page
-- [ ] Verify graph data loads correctly from document
-
 #### Testing & Validation
-- [ ] Manual test: Upload → Processing → Graph flow
+- [x] Manual test: Upload → Processing → Graph flow (WORKING)
 - [ ] Test error scenarios (failed processing, network errors)
 - [ ] Verify MSW mocking works for all endpoints
-- [ ] Test with real backend (set `NEXT_PUBLIC_MSW_ENABLED=false`)
+- [x] Test with real backend (NEXT_PUBLIC_MSW_ENABLED=false) - WORKING
+- [ ] Performance test with larger documents (20+ nodes)
 
 ### 🎨 Nice-to-Have Improvements
 
