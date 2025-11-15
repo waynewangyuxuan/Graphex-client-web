@@ -69,12 +69,6 @@ export function NoteModal({
   edgeId,
   nodeTitle,
 }: NoteModalProps) {
-  // For MVP, we only support node notes
-  if (!nodeId) {
-    console.warn('NoteModal: nodeId is required for MVP');
-    return null;
-  }
-
   // Fetch existing notes for this node
   const {
     notes,
@@ -87,6 +81,12 @@ export function NoteModal({
     isUpdating,
     isDeleting,
   } = useNodeNotes(graphId, nodeId);
+
+  // For MVP, we only support node notes; don't render without a node
+  if (!nodeId) {
+    console.warn('NoteModal: nodeId is required for MVP');
+    return null;
+  }
 
   // Local state for content editing
   const [content, setContent] = useState('');
@@ -141,7 +141,6 @@ export function NoteModal({
   // Delete handler
   const handleDelete = () => {
     if (!existingNote) return;
-
     deleteNote(existingNote.id);
     setContent('');
     setShowDeleteConfirm(false);

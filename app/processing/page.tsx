@@ -206,11 +206,13 @@ export default function ProcessingPage() {
         <Card.Body className="space-y-8 p-8">
           {/* Header with icon */}
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
-              <FileText className="h-8 w-8 text-primary" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="Graphex Logo"
+              className="w-16 h-16 object-contain mb-4"
+            />
             <h1 className="mb-2 text-2xl font-bold text-text-primary">
-              {isGeneratingGraph ? 'Generating Knowledge Graph' : 'Processing Your Document'}
+              {isGeneratingGraph ? 'Generating Your Knowledge Graph' : 'Processing Your Document'}
             </h1>
             <p className="text-sm text-text-secondary">
               {isGeneratingGraph

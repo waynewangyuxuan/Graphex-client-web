@@ -116,16 +116,21 @@ export function findElementAtOffset(
 
   let cumulativeLength = 0;
 
+  // Treat block separation as a single newline so offsets that include
+  // original newlines still map roughly to the right paragraph.
+  const newlineGap = 1;
+
   for (const paragraph of paragraphs) {
     const text = paragraph.textContent || '';
     const paragraphLength = text.length;
+    const paragraphWithGap = paragraphLength + newlineGap;
 
-    // Check if offset falls within this paragraph
-    if (offset <= cumulativeLength + paragraphLength) {
+    // Check if offset falls within this paragraph (including gap)
+    if (offset <= cumulativeLength + paragraphWithGap) {
       return paragraph as HTMLElement;
     }
 
-    cumulativeLength += paragraphLength;
+    cumulativeLength += paragraphWithGap;
   }
 
   // If offset is beyond all text, return last paragraph
@@ -252,19 +257,24 @@ export function highlightDocumentRange(
   let localStartOffset = 0;
   let localEndOffset = 0;
 
+  // Treat block separation as a single newline to better align offsets that
+  // include newlines from the original content.
+  const newlineGap = 1;
+
   // Find the paragraph containing the start offset
   for (const paragraph of paragraphs) {
     const text = paragraph.textContent || '';
     const paragraphLength = text.length;
+    const paragraphWithGap = paragraphLength + newlineGap;
 
-    if (startOffset <= cumulativeLength + paragraphLength) {
+    if (startOffset <= cumulativeLength + paragraphWithGap) {
       targetParagraph = paragraph as HTMLElement;
-      localStartOffset = startOffset - cumulativeLength;
+      localStartOffset = Math.max(0, startOffset - cumulativeLength);
       localEndOffset = Math.min(endOffset - cumulativeLength, paragraphLength);
       break;
     }
 
-    cumulativeLength += paragraphLength;
+    cumulativeLength += paragraphWithGap;
   }
 
   if (!targetParagraph) return () => {};

@@ -9,10 +9,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Main backgrounds
-        background: '#E8F4F8', // Soft light blue
-        canvas: '#F0F8FC', // Lighter blue-white for graph canvas
-        'graph-canvas': '#F0F8FC', // Alias for graph canvas
+        // Main backgrounds - matching Graphex logo
+        background: '#F5F0E8', // Warm beige (lighter than logo)
+        canvas: '#EDE4D8', // Beige from Graphex logo for graph canvas
+        'graph-canvas': '#EDE4D8', // Alias for graph canvas
         chrome: '#FFFFFF', // White for panels and cards
 
         // Primary brand color

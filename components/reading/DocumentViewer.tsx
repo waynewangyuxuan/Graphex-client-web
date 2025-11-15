@@ -110,7 +110,7 @@ export function DocumentViewer({
         cleanupRef.current();
       }
     };
-  }, [highlightRange, onHighlightApplied]);
+  }, [highlightRange, onHighlightApplied, content]);
 
   // Empty state
   if (!content || paragraphs.length === 0) {

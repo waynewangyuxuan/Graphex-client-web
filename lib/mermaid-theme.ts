@@ -120,8 +120,8 @@ export function getMermaidTheme(options?: {
       // Edge/line colors
       lineColor: EDGE_TYPE_COLORS.related, // Gray for default edges
 
-      // Background
-      background: '#F0F8FC', // Canvas color
+      // Background - matching Graphex logo
+      background: '#EDE4D8', // Beige canvas color
 
       // Text
       fontFamily,
@@ -133,6 +133,10 @@ export function getMermaidTheme(options?: {
 
       // Edge styling
       edgeLabelBackground: '#FFFFFF',
+
+      // Label text color (applies to edge labels)
+      labelTextColor: '#2C2C2C', // Dark grey for readability
+      textColor: '#2C2C2C', // Also set general text color
 
       // Class diagram specific (if using class diagrams)
       classText: '#1A3A52',

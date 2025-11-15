@@ -92,7 +92,11 @@ export function ReadingPanel({
     if (containerRef.current) {
       scrollToPosition(containerRef.current, scrollPos, 800);
     }
-  }, [highlightRange]);
+  }, [
+    highlightRange?.startOffset ?? null,
+    highlightRange?.endOffset ?? null,
+    document?.contentText ?? null,
+  ]);
 
   // Loading state
   if (isLoading) {

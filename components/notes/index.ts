@@ -5,6 +5,7 @@
  */
 
 export { NoteModal } from './NoteModal';
+export { NotePanel } from './NotePanel';
 export { NoteContent } from './NoteContent';
 export { SaveStatus } from './SaveStatus';
 

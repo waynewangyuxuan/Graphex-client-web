@@ -31,14 +31,27 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background-color: #F0F8FC;
+  background-color: #EDE4D8; /* Beige canvas to match new theme */
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #90CAF9;
+  background-color: #C4B5A0; /* Darker beige for thumb */
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #64B5F6;
+  background-color: #B0A090; /* Even darker on hover */
+}
+
+/* Mermaid edge label text color override */
+.edgeLabel text,
+.edgeLabel span,
+.edgeLabel .label,
+.edgeLabel,
+.label-container text,
+foreignObject .label,
+.flowchart .edgeLabel text,
+.flowchart .edgeLabel span {
+  fill: #2C2C2C !important;
+  color: #2C2C2C !important;
 }

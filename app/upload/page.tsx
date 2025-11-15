@@ -20,13 +20,28 @@ export default function UploadPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-8">
       <div className="w-full max-w-2xl space-y-8">
         {/* Header */}
-        <div className="text-center space-y-3">
-          <h1 className="text-3xl font-bold text-text-primary">
-            Upload Document to Begin
+        <div className="text-center space-y-4">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <img
+              src="/logo.png"
+              alt="Graphex Logo"
+              className="w-20 h-20 object-contain"
+            />
+          </div>
+
+          {/* App Name */}
+          <h1 className="text-4xl font-bold text-text-primary">
+            Graphex
           </h1>
+
+          {/* Tagline */}
+          <p className="text-lg text-text-secondary max-w-lg mx-auto">
+            Transform your documents into interactive knowledge graphs
+          </p>
+
           <p className="text-base text-text-secondary max-w-lg mx-auto">
-            Upload a PDF, text, or markdown file to generate your knowledge
-            graph and start learning
+            Upload a PDF, text, or markdown file to get started
           </p>
         </div>
 

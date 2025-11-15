@@ -226,14 +226,25 @@ export function applyNodeStyles(
       shapeElement.setAttribute('filter', 'url(#activeGlow)');
     }
 
+    // Hover styling: scale the inner shape instead of the entire node <g>
+    // so we don't overwrite the translation transform that Mermaid applies
+    // to position nodes on the canvas (overwriting it causes nodes to drift
+    // toward the origin/top-left during animations).
     if (state.isHovered) {
-      // Add hover effect
-      (nodeElement as HTMLElement).style.transform = 'scale(1.05)';
-      (nodeElement as HTMLElement).style.transition = 'transform 200ms ease-out';
+      if (shapeElement instanceof HTMLElement || shapeElement instanceof SVGElement) {
+        (shapeElement as HTMLElement).style.transform = 'scale(1.05)';
+        (shapeElement as HTMLElement).style.transformBox = 'fill-box';
+        (shapeElement as HTMLElement).style.transformOrigin = 'center';
+        (shapeElement as HTMLElement).style.transition = 'transform 200ms ease-out';
+      }
       (nodeElement as HTMLElement).style.filter = 'drop-shadow(0 4px 12px rgba(33, 150, 243, 0.15))';
     } else {
-      // Remove hover effect
-      (nodeElement as HTMLElement).style.transform = 'scale(1)';
+      if (shapeElement instanceof HTMLElement || shapeElement instanceof SVGElement) {
+        (shapeElement as HTMLElement).style.transform = 'scale(1)';
+        (shapeElement as HTMLElement).style.transformBox = 'fill-box';
+        (shapeElement as HTMLElement).style.transformOrigin = 'center';
+        (shapeElement as HTMLElement).style.transition = 'transform 200ms ease-out';
+      }
       (nodeElement as HTMLElement).style.filter = 'none';
     }
   });

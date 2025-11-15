@@ -13,7 +13,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { MermaidGraph, type MermaidGraphProps } from './MermaidGraph';
+import { MermaidGraph, type MermaidGraphProps, type MermaidGraphHandle } from './MermaidGraph';
 import { GraphControls } from './GraphControls';
 import { NodeLegend } from './NodeLegend';
 import { FileQuestion, AlertCircle } from 'lucide-react';
@@ -188,30 +188,30 @@ export function GraphContainer({
     hasError: !!error
   });
 
-  const [zoomLevel, setZoomLevel] = useState(1.0);
-  const [panEnabled, setPanEnabled] = useState(false);
+  // Pan on by default so users can drag the canvas immediately
+  const [panEnabled, setPanEnabled] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  const graphRef = useRef<MermaidGraphHandle>(null);
 
   /**
    * Handle zoom in
    */
   const handleZoomIn = useCallback(() => {
-    setZoomLevel((prev) => Math.min(prev + 0.1, 2.0));
+    graphRef.current?.zoomIn();
   }, []);
 
   /**
    * Handle zoom out
    */
   const handleZoomOut = useCallback(() => {
-    setZoomLevel((prev) => Math.max(prev - 0.1, 0.1));
+    graphRef.current?.zoomOut();
   }, []);
 
   /**
    * Handle fit to screen
    */
   const handleFitToScreen = useCallback(() => {
-    setZoomLevel(1.0);
-    // The MermaidGraph component will handle the actual fitting
+    graphRef.current?.fitToScreen();
   }, []);
 
   /**
@@ -219,10 +219,6 @@ export function GraphContainer({
    */
   const handleTogglePan = useCallback((enabled: boolean) => {
     setPanEnabled(enabled);
-    // Update cursor style
-    if (containerRef.current) {
-      containerRef.current.style.cursor = enabled ? 'grab' : 'default';
-    }
   }, []);
 
   /**
@@ -270,10 +266,10 @@ export function GraphContainer({
     <div
       ref={containerRef}
       className={`relative w-full h-full ${className}`}
-      style={{ cursor: panEnabled ? 'grab' : 'default' }}
     >
       {/* Main Graph */}
       <MermaidGraph
+        ref={graphRef}
         graphId={graphId}
         mermaidCode={mermaidCode}
         nodes={nodes}
@@ -283,7 +279,7 @@ export function GraphContainer({
         activeNodeId={activeNodeId}
         nodeStates={nodeStates}
         enableZoom={true}
-        initialZoom={zoomLevel}
+        panEnabled={panEnabled}
       />
 
       {/* Legend */}
@@ -302,7 +298,7 @@ export function GraphContainer({
           onZoomOut={handleZoomOut}
           onFitToScreen={handleFitToScreen}
           onTogglePan={handleTogglePan}
-          zoomLevel={zoomLevel}
+          zoomLevel={1.0}
           panEnabled={panEnabled}
         />
       )}

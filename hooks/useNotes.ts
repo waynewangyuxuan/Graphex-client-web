@@ -493,9 +493,12 @@ export function useDeleteNote(
  * );
  * ```
  */
-export function useNodeNotes(graphId: string, nodeId: string) {
+export function useNodeNotes(graphId: string, nodeId: string | null) {
+  const hasNode = !!nodeId;
+
   const notesQuery = useNotes(graphId, {
-    select: (notes) => notes.filter(note => note.nodeId === nodeId),
+    enabled: !!graphId && hasNode,
+    select: (notes) => (hasNode ? notes.filter(note => note.nodeId === nodeId) : []),
   });
 
   const createNoteMutation = useCreateNote();
@@ -505,17 +508,24 @@ export function useNodeNotes(graphId: string, nodeId: string) {
   return {
     // Query state
     notes: notesQuery.data || [],
-    isLoading: notesQuery.isLoading,
+    isLoading: notesQuery.isLoading && hasNode,
     error: notesQuery.error,
-    hasNotes: (notesQuery.data?.length || 0) > 0,
+    hasNotes: hasNode && (notesQuery.data?.length || 0) > 0,
 
-    // Mutations with graphId/nodeId pre-configured
+    // Convenience mutation helpers (pre-configured)
     createNote: (content: string) =>
-      createNoteMutation.mutate({ graphId, nodeId, content }),
+      hasNode
+        ? createNoteMutation.mutate({ graphId, nodeId, content })
+        : undefined,
     updateNote: (noteId: string, content: string) =>
       updateNoteMutation.mutate({ noteId, graphId, content }),
     deleteNote: (noteId: string) =>
       deleteNoteMutation.mutate({ noteId, graphId }),
+
+    // Full mutation objects (for mutateAsync, status, etc.)
+    createNoteMutation,
+    updateNoteMutation,
+    deleteNoteMutation,
 
     // Mutation states
     isCreating: createNoteMutation.isLoading,

@@ -25,7 +25,7 @@ import { useState, useCallback, use } from 'react';
 import { useGraph } from '@/hooks/useGraph';
 import { GraphContainer } from '@/components/graph';
 import { ReadingPanel } from '@/components/reading';
-import { NoteModal } from '@/components/notes';
+import { NotePanel } from '@/components/notes';
 import { ConnectionModal } from '@/components/connections';
 import { QuizModal, QuizTriggerBanner } from '@/components/quiz';
 import type { GraphNode, GraphEdge } from '@/types/api.types';
@@ -124,7 +124,7 @@ export default function GraphViewPage({ params }: PageProps) {
   /**
    * Handle node click in graph
    * - Updates active node and highlight range for reading panel sync
-   * - Opens NoteModal for note-taking
+   * - Shows note panel in bottom-left corner
    * - Tracks interactions for quiz trigger
    */
   const handleNodeClick = useCallback(
@@ -145,9 +145,9 @@ export default function GraphViewPage({ params }: PageProps) {
         setHighlightRange(null);
       }
 
-      // Open NoteModal
+      // Update note panel state (now shows persistently in bottom-left)
       setNoteModalState({
-        isOpen: true,
+        isOpen: true, // Keeps panel visible
         nodeId,
         nodeTitle: node?.title || null,
       });
@@ -345,23 +345,21 @@ export default function GraphViewPage({ params }: PageProps) {
         role="banner"
       >
         {/* Left: Logo/Title */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <a
             href="/"
-            className="text-primary hover:text-primary-600 transition-colors"
+            className="flex items-center gap-3 group"
             aria-label="Go home"
           >
-            <svg
-              className="w-8 h-8"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
-            </svg>
+            <img
+              src="/logo.png"
+              alt="Graphex Logo"
+              className="w-10 h-10 object-contain"
+            />
+            <h1 className="text-xl font-bold text-text-primary group-hover:text-primary transition-colors">
+              Graphex
+            </h1>
           </a>
-          <h1 className="text-xl font-semibold text-text-primary">
-            Knowledge Graph
-          </h1>
         </div>
 
         {/* Right: Actions */}
@@ -469,16 +467,14 @@ export default function GraphViewPage({ params }: PageProps) {
         interactionCount={interactedNodeIds.size}
       />
 
-      {/* Feature 3: Note Modal - Opens when node is clicked */}
-      {noteModalState.nodeId && (
-        <NoteModal
-          isOpen={noteModalState.isOpen}
-          onClose={handleCloseNoteModal}
-          graphId={graphId}
-          nodeId={noteModalState.nodeId}
-          nodeTitle={noteModalState.nodeTitle || undefined}
-        />
-      )}
+      {/* Feature 3: Note Panel - Persistent panel in bottom-left corner */}
+      <NotePanel
+        isVisible={noteModalState.isOpen}
+        onClose={handleCloseNoteModal}
+        graphId={graphId}
+        nodeId={noteModalState.nodeId}
+        nodeTitle={noteModalState.nodeTitle}
+      />
 
       {/* Feature 4: Connection Modal - Opens when edge is clicked */}
       {connectionModalState.fromNodeId && connectionModalState.toNodeId && (

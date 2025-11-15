@@ -140,11 +140,11 @@ export function GraphControls({
         <button
           onClick={() => onTogglePan?.(!panEnabled)}
           className={`
-            p-2 rounded-md transition-colors
+            p-2 rounded-md transition-colors border
             ${
               panEnabled
-                ? 'bg-primary-100 text-primary-900'
-                : 'hover:bg-primary-50 text-primary-700 hover:text-primary-900'
+                ? 'bg-black text-white border-black'
+                : 'bg-white text-primary-700 hover:bg-primary-50 hover:text-primary-900 border-primary-100'
             }
           `}
           aria-label={panEnabled ? 'Disable pan mode' : 'Enable pan mode'}
