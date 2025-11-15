@@ -19,7 +19,8 @@ import {
   mockTimestamp,
 } from './data';
 
-const BASE_URL = 'http://localhost:3000/api/v1';
+// Use the same base URL as the API client
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
 /**
  * Simulate realistic network delay

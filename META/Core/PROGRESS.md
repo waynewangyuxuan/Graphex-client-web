@@ -253,3 +253,123 @@ Created production-ready components in `/components/ui/`:
 - [COMPLETE] All Features: End-to-end functional
 
 **Next Steps**: Polish, testing, performance optimization (see TODO.md)
+
+## 2025-11-15 (November 15, 2025)
+
+### MSW Configuration & Bug Fixes (100% Complete)
+
+**Issue Resolution**:
+- **Problem**: Upload showed duplicate toasts (success + error "Cannot read properties of undefined (reading 'id')")
+- **Root Cause 1**: `DocumentUploadResponse` type was incorrectly defined as flat structure
+- **Root Cause 2**: MSW base URL was hardcoded to `localhost:3000` instead of matching API URL
+- **Root Cause 3**: MSW was disabled in `.env.local`
+
+**Fixes Applied**:
+1. **Updated Type Definition** (`types/api.types.ts`):
+   - Changed `DocumentUploadResponse` from flat structure to nested structure
+   - Now correctly matches backend response: `{ document: {...}, jobId: '...' }`
+   - Aligns with Server API Reference documentation
+
+2. **Fixed MSW Base URL** (`mocks/handlers.ts`):
+   - Changed from hardcoded `http://localhost:3000/api/v1`
+   - Now uses: `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'`
+   - MSW now intercepts requests correctly
+
+3. **Enabled MSW for Development** (`.env.local`):
+   - Set `NEXT_PUBLIC_MSW_ENABLED=true`
+   - Allows frontend development without backend dependency
+
+**Verification**:
+- [PASS] MSW service worker starts successfully
+- [PASS] API requests intercepted at correct URL
+- [PASS] Upload returns mock data without errors
+- [PASS] Single success toast displayed
+- [PASS] Redirect to processing page works
+
+### Document Processing Page (100% Complete)
+
+**Created New Feature**: `/processing` route for document processing status
+
+**Files Created**:
+- `app/processing/page.tsx` (243 lines) - Main processing page
+- `app/processing/loading.tsx` (28 lines) - Loading state
+- `app/processing/error.tsx` (61 lines) - Error boundary
+- `app/processing/README.md` - Documentation
+
+**Features Implemented**:
+1. **Automatic Status Polling**:
+   - Uses `useDocumentStatus` hook with 2-second interval
+   - Polls while status is 'processing'
+   - Stops when status becomes 'ready' or 'failed'
+
+2. **Progress Display**:
+   - Real-time animated progress bar (0-100%)
+   - Stage-based status messages:
+     - 0-20%: "Starting document analysis..."
+     - 20-40%: "Extracting content..."
+     - 40-60%: "Processing document structure..."
+     - 60-80%: "Analyzing concepts..."
+     - 80-95%: "Generating knowledge graph..."
+     - 95-100%: "Finalizing..."
+
+3. **Smart Redirect**:
+   - Automatically redirects to `/graph/{docId}` when ready
+   - Prevents double-redirect with state flag
+   - Smooth transition using Next.js router
+
+4. **Comprehensive Error Handling**:
+   - Missing `docId` query parameter → User-friendly message
+   - Document not found (404) → Recovery options
+   - Processing failed → Displays backend error message
+   - Page-level errors → Error boundary with retry
+
+5. **Accessibility & Design**:
+   - Follows UIUX.md color system (light blue foundation)
+   - Full ARIA attributes for screen readers
+   - Keyboard navigation support
+   - Smooth animations (200-400ms transitions)
+   - Loading states with spinner
+
+**Architecture**:
+- Client Component (uses `useSearchParams`, `useRouter`, `useDocumentStatus`)
+- React Query integration for server state
+- Local state for redirect tracking
+- Error boundaries at page level
+
+**Integration**:
+- Connects upload flow to graph view
+- Uses existing `useDocumentStatus` hook
+- Leverages existing UI components (Card, Progress, Button, Spinner)
+
+**Data Flow**:
+```
+Upload → POST /documents
+   ↓
+Redirect → /processing?docId=xxx
+   ↓
+Poll → GET /documents/:id/status (every 2s)
+   ↓
+Display Progress (0-100%)
+   ↓
+Redirect → /graph/{docId} (when status === 'ready')
+```
+
+### Session Summary
+
+**Total Changes**:
+- 1 type definition fixed
+- 1 MSW configuration updated
+- 1 environment variable changed
+- 4 new files created (processing page + variants)
+- ~350 lines of production code added
+
+**Impact**:
+- Upload feature now fully functional
+- Complete end-to-end flow from upload to processing
+- MSW properly configured for development
+- Frontend can develop independently of backend
+
+**Status**:
+- Upload flow: 100% complete
+- Processing page: 100% complete
+- Integration: Pending graph page creation

@@ -94,13 +94,14 @@ export interface Document {
  * Matches backend POST /api/v1/documents response
  */
 export interface DocumentUploadResponse {
-  id: string;
-  title: string;
-  sourceType: DocumentSourceType;
-  status: DocumentStatus;
-  fileSize: number;
-  createdAt: string;
-  updatedAt: string;
+  document: {
+    id: string;
+    title: string;
+    sourceType: DocumentSourceType;
+    status: DocumentStatus;
+    createdAt: string;
+  };
+  jobId: string;
 }
 
 /**
