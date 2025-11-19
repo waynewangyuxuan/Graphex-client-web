@@ -79,15 +79,12 @@ export function pdfToCanvasCoords(
  */
 export function isSinglePageReference(
   ref: NodeDocumentReference
-): ref is NodeDocumentReference & {
+): ref is {
+  text: string;
   page: number;
   coordinates: { x: number; y: number; width: number; height: number };
 } {
-  return (
-    ref.page !== undefined &&
-    ref.coordinates !== undefined &&
-    !Array.isArray(ref.coordinates)
-  );
+  return 'page' in ref && !Array.isArray(ref.coordinates);
 }
 
 /**
@@ -98,19 +95,15 @@ export function isSinglePageReference(
  */
 export function isCrossPageReference(
   ref: NodeDocumentReference
-): ref is NodeDocumentReference & {
+): ref is {
+  text: string;
   pages: number[];
   coordinates: Array<{
     page: number;
     bbox: { x: number; y: number; width: number; height: number };
   }>;
 } {
-  return (
-    ref.pages !== undefined &&
-    Array.isArray(ref.pages) &&
-    ref.coordinates !== undefined &&
-    Array.isArray(ref.coordinates)
-  );
+  return 'pages' in ref && Array.isArray(ref.coordinates);
 }
 
 // ============================================================================

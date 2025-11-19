@@ -92,6 +92,18 @@ export default function GraphViewPage({ params }: PageProps) {
     errorMessage: error?.message
   });
 
+  // Debug: Log first node's document reference structure
+  if (graph?.nodes?.[0]) {
+    console.log('[GraphViewPage] First node structure sample:', {
+      id: graph.nodes[0].id,
+      title: graph.nodes[0].title,
+      hasDocumentRefs: !!graph.nodes[0].documentRefs,
+      documentRefs: graph.nodes[0].documentRefs,
+      hasLegacyRefs: !!graph.nodes[0].legacyDocumentRefs,
+      legacyDocumentRefs: graph.nodes[0].legacyDocumentRefs,
+    });
+  }
+
   // Reading panel state
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
 

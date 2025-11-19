@@ -15,7 +15,7 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useDocument } from '@/hooks/useDocument';
 import { DocumentViewer } from './DocumentViewer';
@@ -125,6 +125,17 @@ export function ReadingPanel({
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfError, setPdfError] = useState<Error | null>(null);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
+
+  // Memoized PDF load handler (prevents PDFViewer from re-rendering)
+  const handlePdfLoad = useCallback((pageCount: number) => {
+    console.log(`[ReadingPanel] PDF loaded: ${pageCount} pages`);
+  }, []);
+
+  // Memoized PDF error handler (prevents PDFViewer from re-rendering)
+  const handlePdfError = useCallback((error: Error) => {
+    console.error('[ReadingPanel] PDF rendering error:', error);
+    setPdfError(error);
+  }, []);
 
   // Fetch PDF file when document is ready and is a PDF
   useEffect(() => {
@@ -321,13 +332,8 @@ export function ReadingPanel({
                 pdfUrl={pdfUrl}
                 highlightReferences={highlightReferences}
                 scale={1.5}
-                onLoad={(pageCount) => {
-                  console.log(`[ReadingPanel] PDF loaded: ${pageCount} pages`);
-                }}
-                onError={(error) => {
-                  console.error('[ReadingPanel] PDF rendering error:', error);
-                  setPdfError(error);
-                }}
+                onLoad={handlePdfLoad}
+                onError={handlePdfError}
               />
             )}
 

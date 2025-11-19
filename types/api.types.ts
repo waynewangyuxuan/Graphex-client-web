@@ -158,33 +158,36 @@ export interface DocumentReference {
 }
 
 /**
- * Coordinate-based document reference (NEW - for precise PDF highlighting)
- * Supports both single-page and cross-page references
+ * Bounding box coordinates in PDF coordinate system
+ * (origin at bottom-left, Y increases upward)
  */
-export interface NodeDocumentReference {
-  text: string; // Referenced text content
-
-  // Single-page reference (most common)
-  page?: number; // 0-indexed page number
-  coordinates?: {
-    x: number; // PDF coordinate (points from left)
-    y: number; // PDF coordinate (points from bottom)
-    width: number;
-    height: number;
-  };
-
-  // Cross-page reference (advanced - for text spanning multiple pages)
-  pages?: number[]; // Array of page numbers
-  coordinates?: Array<{
-    page: number;
-    bbox: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    };
-  }>;
+export interface BoundingBox {
+  x: number; // PDF coordinate (points from left)
+  y: number; // PDF coordinate (points from bottom)
+  width: number;
+  height: number;
 }
+
+/**
+ * Coordinate-based document reference (NEW - for precise PDF highlighting)
+ * Uses discriminated union for type safety between single-page and cross-page references
+ */
+export type NodeDocumentReference =
+  | {
+      // Single-page reference (most common)
+      text: string;
+      page: number; // 0-indexed page number
+      coordinates: BoundingBox;
+    }
+  | {
+      // Cross-page reference (for text spanning multiple pages)
+      text: string;
+      pages: number[]; // Array of page numbers
+      coordinates: Array<{
+        page: number;
+        bbox: BoundingBox;
+      }>;
+    };
 
 /**
  * Document references container for graph nodes
