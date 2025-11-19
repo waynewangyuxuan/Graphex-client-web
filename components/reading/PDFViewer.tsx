@@ -133,7 +133,11 @@ export function PDFViewer({
       const numPages = pdf.numPages;
       setPageCount(numPages);
 
-      // Clear container
+      // Clear container (safety check in case ref became null)
+      if (!containerRef.current) {
+        console.error('[PDFViewer] containerRef became null after PDF load');
+        return;
+      }
       containerRef.current.innerHTML = '';
 
       // Render each page
@@ -159,6 +163,11 @@ export function PDFViewer({
         pageContainer.dataset.pageNumber = String(pageNum - 1);
         pageContainer.appendChild(canvas);
 
+        // Safety check before appending
+        if (!containerRef.current) {
+          console.error('[PDFViewer] containerRef became null during page rendering');
+          break;
+        }
         containerRef.current.appendChild(pageContainer);
 
         // Render PDF page
