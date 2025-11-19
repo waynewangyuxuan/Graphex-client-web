@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { FileText, AlertCircle, ArrowLeft } from 'lucide-react';
+import type { DocumentStatusResponse } from '@/types/api.types';
 
 /**
  * Document Processing & Graph Generation Page
@@ -36,7 +37,12 @@ export default function ProcessingPage() {
   // Poll document status (automatically polls every 2s while processing)
   const { data: status, error: docError, isError: isDocError, isLoading } = useDocumentStatus(docId || '', {
     enabled: !!docId,
-  });
+  }) as {
+    data: DocumentStatusResponse | undefined;
+    error: any;
+    isError: boolean;
+    isLoading: boolean;
+  };
 
   // Graph generation mutation
   const generateGraph = useGenerateGraph({

@@ -71,6 +71,20 @@ export type DocumentSourceType = 'pdf' | 'text' | 'markdown' | 'url';
 export type DocumentStatus = 'processing' | 'ready' | 'failed';
 
 /**
+ * Text block with bounding box coordinates (for PDF documents)
+ */
+export interface TextBlock {
+  text: string;
+  page: number; // 0-indexed page number
+  bbox: {
+    x: number; // PDF coordinate (points from left)
+    y: number; // PDF coordinate (points from bottom)
+    width: number;
+    height: number;
+  };
+}
+
+/**
  * Complete document object
  * Matches backend GET /api/v1/documents/:id response
  */
@@ -86,6 +100,9 @@ export interface Document {
       score: number;
     };
     images?: unknown[];
+    textBlocks?: TextBlock[]; // PDF text blocks with coordinates
+    pageCount?: number; // Number of pages (for PDFs)
+    wordCount?: number; // Total word count
   };
 }
 
@@ -131,13 +148,49 @@ export interface DocumentStatusResponse {
 export type GraphStatus = 'ready' | 'processing' | 'failed';
 
 /**
- * Document reference within a node (source reference)
- * Matches backend sourceReferences structure
+ * Document reference within a node (source reference) - LEGACY
+ * Character-based references (backward compatible)
  */
 export interface DocumentReference {
   start: number; // Character position in document.content
   end: number; // Character position in document.content
   text: string; // Actual text snippet
+}
+
+/**
+ * Coordinate-based document reference (NEW - for precise PDF highlighting)
+ * Supports both single-page and cross-page references
+ */
+export interface NodeDocumentReference {
+  text: string; // Referenced text content
+
+  // Single-page reference (most common)
+  page?: number; // 0-indexed page number
+  coordinates?: {
+    x: number; // PDF coordinate (points from left)
+    y: number; // PDF coordinate (points from bottom)
+    width: number;
+    height: number;
+  };
+
+  // Cross-page reference (advanced - for text spanning multiple pages)
+  pages?: number[]; // Array of page numbers
+  coordinates?: Array<{
+    page: number;
+    bbox: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+  }>;
+}
+
+/**
+ * Document references container for graph nodes
+ */
+export interface NodeDocumentRefs {
+  references: NodeDocumentReference[];
 }
 
 /**
@@ -151,7 +204,8 @@ export interface GraphNode {
   contentSnippet: string; // Brief content preview
   nodeType: string; // e.g., "method", "concept"
   summary: string; // 2-sentence summary
-  documentRefs: DocumentReference[] | null; // Source references (null if none)
+  documentRefs: NodeDocumentRefs | null; // Coordinate-based references (NEW)
+  legacyDocumentRefs?: DocumentReference[] | null; // Legacy character-based refs (backward compat)
   position: { x: number | null; y: number | null }; // Visual position
   metadata: Record<string, unknown> | null; // Additional metadata
 }

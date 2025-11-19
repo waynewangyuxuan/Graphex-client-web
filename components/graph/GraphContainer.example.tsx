@@ -33,11 +33,11 @@ export function BasicGraphExample() {
         B --> E[RNNs]
     `,
     nodes: [
-      { id: 'A', nodeKey: 'A', title: 'Neural Networks', contentSnippet: '...', documentRefs: [] },
-      { id: 'B', nodeKey: 'B', title: 'Deep Learning', contentSnippet: '...', documentRefs: [] },
-      { id: 'C', nodeKey: 'C', title: 'Backpropagation', contentSnippet: '...', documentRefs: [] },
-      { id: 'D', nodeKey: 'D', title: 'CNNs', contentSnippet: '...', documentRefs: [] },
-      { id: 'E', nodeKey: 'E', title: 'RNNs', contentSnippet: '...', documentRefs: [] },
+      { id: 'A', nodeKey: 'A', title: 'Neural Networks', contentSnippet: '...', nodeType: 'concept', summary: 'Neural networks overview', documentRefs: null, position: { x: null, y: null }, metadata: null },
+      { id: 'B', nodeKey: 'B', title: 'Deep Learning', contentSnippet: '...', nodeType: 'concept', summary: 'Deep learning overview', documentRefs: null, position: { x: null, y: null }, metadata: null },
+      { id: 'C', nodeKey: 'C', title: 'Backpropagation', contentSnippet: '...', nodeType: 'concept', summary: 'Backpropagation overview', documentRefs: null, position: { x: null, y: null }, metadata: null },
+      { id: 'D', nodeKey: 'D', title: 'CNNs', contentSnippet: '...', nodeType: 'concept', summary: 'CNNs overview', documentRefs: null, position: { x: null, y: null }, metadata: null },
+      { id: 'E', nodeKey: 'E', title: 'RNNs', contentSnippet: '...', nodeType: 'concept', summary: 'RNNs overview', documentRefs: null, position: { x: null, y: null }, metadata: null },
     ],
     edges: [],
   };
@@ -124,7 +124,7 @@ export function GraphWithLoadingExample({ graphId }: { graphId: string }) {
   // In real app, use useGraph hook
   const isLoading = false;
   const error = null;
-  const graph = null;
+  const graph: any = null; // Type this properly in real app
 
   if (isLoading) {
     return (

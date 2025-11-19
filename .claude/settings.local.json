@@ -25,7 +25,10 @@
       "Bash(git push:*)",
       "Bash(pnpm msw:*)",
       "Bash(npx eslint:*)",
-      "Bash(pnpm dev)"
+      "Bash(pnpm dev)",
+      "Bash(chmod:*)",
+      "Bash(git fetch:*)",
+      "Bash(pnpm exec tsc:*)"
     ],
     "deny": [],
     "ask": []

@@ -28,7 +28,7 @@ import { ReadingPanel } from '@/components/reading';
 import { NotePanel } from '@/components/notes';
 import { ConnectionModal } from '@/components/connections';
 import { QuizModal, QuizTriggerBanner } from '@/components/quiz';
-import type { GraphNode, GraphEdge } from '@/types/api.types';
+import type { Graph, GraphNode, GraphEdge } from '@/types/api.types';
 
 // ============================================================================
 // Types
@@ -78,7 +78,11 @@ export default function GraphViewPage({ params }: PageProps) {
   console.log('[GraphViewPage] Rendering with graphId:', graphId);
 
   // Fetch graph data
-  const { data: graph, isLoading, error } = useGraph(graphId);
+  const { data: graph, isLoading, error } = useGraph(graphId) as {
+    data: Graph | undefined;
+    isLoading: boolean;
+    error: any;
+  };
 
   console.log('[GraphViewPage] Query state:', {
     graphId,
@@ -90,10 +94,17 @@ export default function GraphViewPage({ params }: PageProps) {
 
   // Reading panel state
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
+
+  // Legacy: character-based highlighting (for text documents)
   const [highlightRange, setHighlightRange] = useState<{
     startOffset: number;
     endOffset: number;
   } | null>(null);
+
+  // New: coordinate-based highlighting (for PDF documents)
+  const [highlightReferences, setHighlightReferences] = useState<
+    import('@/types/api.types').NodeDocumentReference[] | null
+  >(null);
 
   // Modal states
   const [noteModalState, setNoteModalState] = useState<NoteModalState>({
@@ -126,23 +137,45 @@ export default function GraphViewPage({ params }: PageProps) {
    * - Updates active node and highlight range for reading panel sync
    * - Shows note panel in bottom-left corner
    * - Tracks interactions for quiz trigger
+   * - Supports both legacy (character-based) and new (coordinate-based) references
    */
   const handleNodeClick = useCallback(
     (nodeId: string) => {
+      console.log('[GraphViewPage] Node clicked:', nodeId);
+
       // Update reading panel state
       setActiveNodeId(nodeId);
 
       // Find node's document reference
       const node = graph?.nodes.find((n) => n.id === nodeId);
-      if (node?.documentRefs?.[0]) {
-        const ref = node.documentRefs[0];
+      console.log('[GraphViewPage] Node data:', {
+        nodeId,
+        hasNode: !!node,
+        hasDocumentRefs: !!node?.documentRefs,
+        hasLegacyRefs: !!node?.legacyDocumentRefs,
+        documentRefs: node?.documentRefs,
+        legacyDocumentRefs: node?.legacyDocumentRefs,
+      });
+
+      if (node?.documentRefs?.references) {
+        // New format: coordinate-based references (for PDFs)
+        console.log('[GraphViewPage] Setting coordinate-based references:', node.documentRefs.references);
+        setHighlightReferences(node.documentRefs.references);
+        setHighlightRange(null); // Clear legacy highlight
+      } else if (node?.legacyDocumentRefs?.[0]) {
+        // Legacy format: character-based references (for text documents)
+        const ref = node.legacyDocumentRefs[0];
+        console.log('[GraphViewPage] Setting legacy character-based reference:', ref);
         setHighlightRange({
           startOffset: ref.start,
           endOffset: ref.end,
         });
+        setHighlightReferences(null); // Clear new highlight
       } else {
-        // Clear highlight if node has no refs
+        // Clear both highlights if node has no refs
+        console.log('[GraphViewPage] No references found, clearing highlights');
         setHighlightRange(null);
+        setHighlightReferences(null);
       }
 
       // Update note panel state (now shows persistently in bottom-left)
@@ -445,6 +478,7 @@ export default function GraphViewPage({ params }: PageProps) {
             documentId={graph.document.id}
             activeNodeId={activeNodeId}
             highlightRange={highlightRange}
+            highlightReferences={highlightReferences}
           />
         </div>
       </div>

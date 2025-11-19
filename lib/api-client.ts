@@ -29,6 +29,12 @@ const DEFAULT_TIMEOUT = 30000;
  */
 export const UPLOAD_TIMEOUT = 300000;
 
+/**
+ * Extended timeout for graph generation (2 minutes)
+ * Graph generation can take 60-90 seconds for large documents
+ */
+export const GRAPH_GENERATION_TIMEOUT = 120000;
+
 // ============================================================================
 // Axios Instance
 // ============================================================================

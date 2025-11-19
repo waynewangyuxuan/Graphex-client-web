@@ -135,3 +135,32 @@ export async function getDocumentStatus(
     `/documents/${documentId}/status`
   );
 }
+
+// ============================================================================
+// Get Document File
+// ============================================================================
+
+/**
+ * Get the actual PDF file for rendering
+ *
+ * Fetches the binary PDF file for use with PDF.js or other rendering libraries.
+ * The file is served with proper caching headers for optimal performance.
+ *
+ * @param documentId - Document ID
+ * @returns PDF file as a Blob
+ *
+ * @example
+ * ```typescript
+ * const pdfBlob = await getDocumentFile('doc_abc123');
+ * const pdfUrl = URL.createObjectURL(pdfBlob);
+ *
+ * // Use with PDF.js
+ * const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+ * ```
+ */
+export async function getDocumentFile(documentId: string): Promise<Blob> {
+  const response = await apiClient.get(`/documents/${documentId}/file`, {
+    responseType: 'blob',
+  });
+  return response as unknown as Blob;
+}

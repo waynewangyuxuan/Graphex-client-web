@@ -4,7 +4,7 @@
  * API functions for graph generation, retrieval, and job status polling.
  */
 
-import apiClient from '@/lib/api-client';
+import apiClient, { GRAPH_GENERATION_TIMEOUT } from '@/lib/api-client';
 import type {
   Graph,
   GraphGenerationRequest,
@@ -37,7 +37,10 @@ export async function generateGraph(
 ): Promise<GraphGenerationResponse> {
   return apiClient.post<GraphGenerationRequest, GraphGenerationResponse>(
     '/graphs/generate',
-    request
+    request,
+    {
+      timeout: GRAPH_GENERATION_TIMEOUT, // 2 minutes - graph generation can take 60-90s
+    }
   );
 }
 

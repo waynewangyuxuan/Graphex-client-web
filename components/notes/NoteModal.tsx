@@ -80,7 +80,17 @@ export function NoteModal({
     isCreating,
     isUpdating,
     isDeleting,
-  } = useNodeNotes(graphId, nodeId);
+  } = useNodeNotes(graphId, nodeId ?? null) as {
+    notes: import('@/types/api.types').Note[] | undefined;
+    isLoading: boolean;
+    createNote: any;
+    updateNote: any;
+    deleteNote: any;
+    hasNotes: boolean;
+    isCreating: boolean;
+    isUpdating: boolean;
+    isDeleting: boolean;
+  };
 
   // For MVP, we only support node notes; don't render without a node
   if (!nodeId) {
@@ -94,7 +104,7 @@ export function NoteModal({
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // Get the first note (MVP: one note per node)
-  const existingNote = notes[0];
+  const existingNote = notes?.[0];
 
   // Initialize content when modal opens or note loads
   useEffect(() => {

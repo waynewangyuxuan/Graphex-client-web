@@ -59,12 +59,22 @@ export function NotePanel({
     isCreating,
     isUpdating,
     isDeleting,
-  } = useNodeNotes(graphId, nodeId);
+  } = useNodeNotes(graphId, nodeId) as {
+    notes: import('@/types/api.types').Note[] | undefined;
+    isLoading: boolean;
+    createNoteMutation: any;
+    updateNoteMutation: any;
+    deleteNoteMutation: any;
+    hasNotes: boolean;
+    isCreating: boolean;
+    isUpdating: boolean;
+    isDeleting: boolean;
+  };
 
   // Only render when a node is selected and panel is visible
   const isActive = isVisible && !!nodeId;
 
-  const existingNote = notes[0];
+  const existingNote = notes?.[0];
 
   // Initialize content when node changes or note loads
   useEffect(() => {

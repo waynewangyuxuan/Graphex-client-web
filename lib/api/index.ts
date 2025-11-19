@@ -11,6 +11,7 @@ export {
   uploadDocumentFromUrl,
   getDocument,
   getDocumentStatus,
+  getDocumentFile,
 } from './documents';
 
 // Graph operations

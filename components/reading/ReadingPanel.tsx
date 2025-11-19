@@ -15,11 +15,30 @@
 
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useDocument } from '@/hooks/useDocument';
 import { DocumentViewer } from './DocumentViewer';
 import { ScrollIndicator } from './ScrollIndicator';
 import { scrollToPosition, calculateScrollPosition } from '@/lib/scroll-utils';
+import { getDocumentFile } from '@/lib/api/documents';
+import type { NodeDocumentReference } from '@/types/api.types';
+
+// Dynamically import PDFViewer with no SSR to avoid DOMMatrix errors
+const PDFViewer = dynamic(
+  () => import('./PDFViewer').then((mod) => ({ default: mod.PDFViewer })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2" />
+          <p className="text-sm text-text-secondary">Loading PDF viewer...</p>
+        </div>
+      </div>
+    ),
+  }
+);
 
 // ============================================================================
 // Types
@@ -37,12 +56,17 @@ export interface ReadingPanelProps {
   activeNodeId?: string | null;
 
   /**
-   * Character range to highlight
+   * Character range to highlight (for text documents - LEGACY)
    */
   highlightRange?: {
     startOffset: number;
     endOffset: number;
   } | null;
+
+  /**
+   * Coordinate-based references to highlight (for PDF documents - NEW)
+   */
+  highlightReferences?: NodeDocumentReference[] | null;
 
   /**
    * Additional CSS classes
@@ -57,12 +81,23 @@ export interface ReadingPanelProps {
 /**
  * ReadingPanel - Side panel for document reading
  *
+ * Supports both text documents (with character-based highlighting)
+ * and PDF documents (with coordinate-based highlighting).
+ *
  * @example
  * ```tsx
+ * // Text document (legacy)
  * <ReadingPanel
  *   documentId="doc_abc123"
  *   activeNodeId={selectedNodeId}
  *   highlightRange={{ startOffset: 120, endOffset: 350 }}
+ * />
+ *
+ * // PDF document (new)
+ * <ReadingPanel
+ *   documentId="doc_abc123"
+ *   activeNodeId={selectedNodeId}
+ *   highlightReferences={selectedNode?.documentRefs?.references}
  * />
  * ```
  */
@@ -70,13 +105,71 @@ export function ReadingPanel({
   documentId,
   activeNodeId,
   highlightRange,
+  highlightReferences,
   className = '',
 }: ReadingPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Fetch document data
-  const { data: document, isLoading, error } = useDocument(documentId);
+  const { data: document, isLoading, error } = useDocument(documentId) as {
+    data: import('@/types/api.types').Document | undefined;
+    isLoading: boolean;
+    error: any;
+  };
+
+  // Determine if document is PDF
+  const isPDF = document?.sourceType === 'pdf';
+
+  // PDF file state
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfError, setPdfError] = useState<Error | null>(null);
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
+
+  // Fetch PDF file when document is ready and is a PDF
+  useEffect(() => {
+    if (!isPDF || !documentId) {
+      setPdfUrl(null);
+      return;
+    }
+
+    let objectUrl: string | null = null;
+
+    const fetchPDF = async () => {
+      setIsPdfLoading(true);
+      setPdfError(null);
+
+      try {
+        console.log('[ReadingPanel] Fetching PDF file for document:', documentId);
+        const blob = await getDocumentFile(documentId);
+        console.log('[ReadingPanel] PDF blob received:', blob.size, 'bytes');
+
+        // Create object URL from blob
+        objectUrl = URL.createObjectURL(blob);
+        console.log('[ReadingPanel] PDF object URL created:', objectUrl);
+
+        console.log('[ReadingPanel] Setting pdfUrl state to:', objectUrl);
+        setPdfUrl(objectUrl);
+        console.log('[ReadingPanel] Setting isPdfLoading to false');
+        setIsPdfLoading(false);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Failed to fetch PDF');
+        console.error('[ReadingPanel] Error fetching PDF:', error);
+        setPdfError(error);
+        setIsPdfLoading(false);
+      }
+    };
+
+    fetchPDF();
+
+    // Cleanup: Revoke object URL when component unmounts or document changes
+    return () => {
+      if (objectUrl) {
+        console.log('[ReadingPanel] Revoking PDF object URL:', objectUrl);
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [isPDF, documentId]);
 
   // Scroll to highlighted section when highlightRange changes
   useEffect(() => {
@@ -95,7 +188,7 @@ export function ReadingPanel({
   }, [
     highlightRange?.startOffset ?? null,
     highlightRange?.endOffset ?? null,
-    document?.contentText ?? null,
+    document?.content ?? null,
   ]);
 
   // Loading state
@@ -184,6 +277,11 @@ export function ReadingPanel({
         {document.sourceType && (
           <p className="text-xs text-text-muted mt-1">
             {document.sourceType.toUpperCase()} document
+            {isPDF && document.metadata?.pageCount && (
+              <span className="ml-2">
+                • {document.metadata.pageCount} {document.metadata.pageCount === 1 ? 'page' : 'pages'}
+              </span>
+            )}
           </p>
         )}
       </div>
@@ -193,26 +291,85 @@ export function ReadingPanel({
         ref={containerRef}
         className="h-[calc(100%-5rem)] overflow-y-auto px-8 py-6"
       >
-        {/* Content container with max width for readability */}
-        <div
-          ref={contentRef}
-          className="max-w-prose mx-auto"
-        >
-          <DocumentViewer
-            content={document.content}
-            highlightRange={highlightRange}
-          />
-        </div>
+        {isPDF ? (
+          /* PDF Viewer with coordinate-based highlighting */
+          <div>
+            {/* Show loading state while fetching PDF */}
+            {isPdfLoading && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Loading PDF...</strong> Please wait while we fetch the document.
+                </p>
+              </div>
+            )}
+
+            {/* Show error if PDF fetch failed */}
+            {pdfError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800">
+                  <strong>Error:</strong> {pdfError.message}
+                </p>
+                <p className="text-xs text-red-600 mt-1">
+                  Showing extracted text below as fallback.
+                </p>
+              </div>
+            )}
+
+            {/* Render PDF viewer when URL is ready */}
+            {pdfUrl && !pdfError && (
+              <PDFViewer
+                pdfUrl={pdfUrl}
+                highlightReferences={highlightReferences}
+                scale={1.5}
+                onLoad={(pageCount) => {
+                  console.log(`[ReadingPanel] PDF loaded: ${pageCount} pages`);
+                }}
+                onError={(error) => {
+                  console.error('[ReadingPanel] PDF rendering error:', error);
+                  setPdfError(error);
+                }}
+              />
+            )}
+
+            {/* Fallback: Show extracted text if PDF fails or while loading */}
+            {(pdfError || !pdfUrl) && (
+              <div className={pdfError ? 'mt-0' : 'mt-8 pt-8 border-t border-gray-200'}>
+                <h3 className="text-lg font-semibold mb-4 text-text-primary">
+                  {pdfError ? 'Document Text (Fallback)' : 'Extracted Text'}
+                </h3>
+                <div className="max-w-prose mx-auto">
+                  <DocumentViewer
+                    content={document.content}
+                    highlightRange={highlightRange}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Text Viewer with character-based highlighting (legacy) */
+          <div
+            ref={contentRef}
+            className="max-w-prose mx-auto"
+          >
+            <DocumentViewer
+              content={document.content}
+              highlightRange={highlightRange}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Scroll indicator */}
-      <ScrollIndicator
-        containerRef={containerRef}
-        position="bottom-right"
-      />
+      {/* Scroll indicator (only for text documents) */}
+      {!isPDF && (
+        <ScrollIndicator
+          containerRef={containerRef as React.RefObject<HTMLElement>}
+          position="bottom-right"
+        />
+      )}
 
       {/* Scroll to top button (appears when scrolled down) */}
-      <ScrollToTopButton containerRef={containerRef} />
+      {!isPDF && <ScrollToTopButton containerRef={containerRef as React.RefObject<HTMLElement>} />}
     </div>
   );
 }
