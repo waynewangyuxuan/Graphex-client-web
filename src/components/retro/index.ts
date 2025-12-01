@@ -7,3 +7,5 @@ export { SectionHeader } from './SectionHeader';
 export { Modal } from './Modal';
 export { ContextMenu } from './ContextMenu';
 export { Select } from './Select';
+export { InputModal } from './InputModal';
+export { ConfirmModal } from './ConfirmModal';

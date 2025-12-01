@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Folder } from '@/types';
 import { retro } from '@/styles/retro';
-import { Inset, Button, SectionHeader, ContextMenu } from '@/components/retro';
+import { Inset, Button, SectionHeader, ContextMenu, InputModal, ConfirmModal } from '@/components/retro';
 
 interface FolderTreeProps {
   folders: Folder[];
@@ -30,6 +30,11 @@ export function FolderTree({
     folderId: string | null;
   } | null>(null);
 
+  // Modal states
+  const [newFolderModal, setNewFolderModal] = useState<{ parentId: string | null } | null>(null);
+  const [renameModal, setRenameModal] = useState<{ id: string; name: string } | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{ id: string; name: string } | null>(null);
+
   const toggleExpand = (folderId: string) => {
     setExpandedIds((prev) => {
       const next = new Set(prev);
@@ -43,10 +48,7 @@ export function FolderTree({
   };
 
   const handleNewFolder = () => {
-    const name = prompt('Folder name:');
-    if (name?.trim()) {
-      onCreateFolder(name.trim(), selectedFolderId);
-    }
+    setNewFolderModal({ parentId: selectedFolderId });
   };
 
   const handleDragOver = (e: React.DragEvent, folderId: string | null) => {
@@ -136,17 +138,15 @@ export function FolderTree({
         {
           label: 'New Subfolder',
           onClick: () => {
-            const name = prompt('Folder name:');
-            if (name?.trim()) onCreateFolder(name.trim(), contextMenu.folderId);
+            setNewFolderModal({ parentId: contextMenu.folderId });
           },
         },
         {
           label: 'Rename',
           onClick: () => {
             const folder = folders.find((f) => f.id === contextMenu.folderId);
-            const name = prompt('New name:', folder?.name);
-            if (name?.trim() && contextMenu.folderId) {
-              onRenameFolder(contextMenu.folderId, name.trim());
+            if (folder) {
+              setRenameModal({ id: folder.id, name: folder.name });
             }
           },
         },
@@ -154,8 +154,9 @@ export function FolderTree({
         {
           label: 'Delete',
           onClick: () => {
-            if (contextMenu.folderId && confirm('Delete this folder?')) {
-              onDeleteFolder(contextMenu.folderId);
+            const folder = folders.find((f) => f.id === contextMenu.folderId);
+            if (folder) {
+              setDeleteModal({ id: folder.id, name: folder.name });
             }
           },
         },
@@ -164,8 +165,7 @@ export function FolderTree({
         {
           label: 'New Folder',
           onClick: () => {
-            const name = prompt('Folder name:');
-            if (name?.trim()) onCreateFolder(name.trim(), null);
+            setNewFolderModal({ parentId: null });
           },
         },
       ];
@@ -226,6 +226,43 @@ export function FolderTree({
           onClose={() => setContextMenu(null)}
         />
       )}
+
+      {/* New Folder Modal */}
+      <InputModal
+        title="New Folder"
+        label="Folder name:"
+        placeholder="Enter folder name"
+        isOpen={newFolderModal !== null}
+        onClose={() => setNewFolderModal(null)}
+        onSubmit={(name) => onCreateFolder(name, newFolderModal?.parentId ?? null)}
+        submitLabel="Create"
+      />
+
+      {/* Rename Modal */}
+      <InputModal
+        title="Rename Folder"
+        label="New name:"
+        defaultValue={renameModal?.name ?? ''}
+        isOpen={renameModal !== null}
+        onClose={() => setRenameModal(null)}
+        onSubmit={(name) => {
+          if (renameModal) onRenameFolder(renameModal.id, name);
+        }}
+        submitLabel="Rename"
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        title="Delete Folder"
+        message={`Are you sure you want to delete "${deleteModal?.name}"? Items inside will be moved to the parent folder.`}
+        isOpen={deleteModal !== null}
+        onClose={() => setDeleteModal(null)}
+        onConfirm={() => {
+          if (deleteModal) onDeleteFolder(deleteModal.id);
+        }}
+        confirmLabel="Delete"
+        danger
+      />
     </div>
   );
 }

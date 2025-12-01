@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { Folder, EntitySummary } from '@/types';
 import { retro } from '@/styles/retro';
-import { Window, TitleBar, StatusBar, Modal } from '@/components/retro';
+import { Window, TitleBar, StatusBar, Modal, InputModal, ConfirmModal } from '@/components/retro';
 import { FolderTree, EntityList } from '@/components/dashboard';
 
 export default function Dashboard() {
@@ -14,6 +14,11 @@ export default function Dashboard() {
   const [moveModalOpen, setMoveModalOpen] = useState(false);
   const [entitiesToMove, setEntitiesToMove] = useState<string[]>([]);
   const [moveTargetFolderId, setMoveTargetFolderId] = useState<string | null>(null);
+
+  // Modal state for new entity and delete confirmation
+  const [newEntityModalOpen, setNewEntityModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [entitiesToDelete, setEntitiesToDelete] = useState<string[]>([]);
 
   // Fetch data on mount
   useEffect(() => {
@@ -61,26 +66,31 @@ export default function Dashboard() {
   };
 
   const handleCreateEntity = () => {
-    const title = prompt('Entity name:');
-    if (title?.trim()) {
-      const newEntity: EntitySummary = {
-        id: `entity-${Date.now()}`,
-        title: title.trim(),
-        folderId: selectedFolderId,
-        tags: [],
-        createdAt: new Date().toISOString(),
-        modifiedAt: new Date().toISOString(),
-        stats: { nodeCount: 0, edgeCount: 0, pageCount: 0 },
-      };
-      setEntities((prev) => [...prev, newEntity]);
-    }
+    setNewEntityModalOpen(true);
+  };
+
+  const handleConfirmCreateEntity = (title: string) => {
+    const newEntity: EntitySummary = {
+      id: `entity-${Date.now()}`,
+      title,
+      folderId: selectedFolderId,
+      tags: [],
+      createdAt: new Date().toISOString(),
+      modifiedAt: new Date().toISOString(),
+      stats: { nodeCount: 0, edgeCount: 0, pageCount: 0 },
+    };
+    setEntities((prev) => [...prev, newEntity]);
   };
 
   const handleDeleteEntities = (ids: string[]) => {
-    if (confirm(`Delete ${ids.length} item(s)?`)) {
-      setEntities((prev) => prev.filter((e) => !ids.includes(e.id)));
-      setSelectedEntityIds([]);
-    }
+    setEntitiesToDelete(ids);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setEntities((prev) => prev.filter((e) => !entitiesToDelete.includes(e.id)));
+    setSelectedEntityIds([]);
+    setEntitiesToDelete([]);
   };
 
   const handleMoveEntities = (ids: string[]) => {
@@ -296,6 +306,31 @@ export default function Dashboard() {
           ))}
         </div>
       </Modal>
+
+      {/* New Entity Modal */}
+      <InputModal
+        title="New Knowledge Entity"
+        label="Entity name:"
+        placeholder="Enter entity name"
+        isOpen={newEntityModalOpen}
+        onClose={() => setNewEntityModalOpen(false)}
+        onSubmit={handleConfirmCreateEntity}
+        submitLabel="Create"
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        title="Delete Items"
+        message={`Are you sure you want to delete ${entitiesToDelete.length} item(s)? This action cannot be undone.`}
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setEntitiesToDelete([]);
+        }}
+        onConfirm={handleConfirmDelete}
+        confirmLabel="Delete"
+        danger
+      />
     </div>
   );
 }
