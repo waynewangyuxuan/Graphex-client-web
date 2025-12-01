@@ -190,7 +190,7 @@ export function EntityList({
         {/* Sort options */}
         <Select
           value={sortField}
-          onChange={(e) => setSortField(e.target.value as SortField)}
+          onChange={(value: string) => setSortField(value as SortField)}
           options={[
             { value: 'title', label: 'Name' },
             { value: 'modifiedAt', label: 'Date Modified' },
