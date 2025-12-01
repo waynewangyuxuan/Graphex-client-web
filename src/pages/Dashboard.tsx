@@ -1,7 +1,78 @@
+import { useState, useEffect, useMemo } from 'react';
+import type { Folder, EntitySummary } from '@/types';
 import { retro } from '@/styles/retro';
-import { Window, TitleBar, StatusBar, SectionHeader, Inset, Button } from '@/components/retro';
+import { Window, TitleBar, StatusBar } from '@/components/retro';
+import { FolderTree, EntityList } from '@/components/dashboard';
 
 export default function Dashboard() {
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [entities, setEntities] = useState<EntitySummary[]>([]);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [selectedEntityIds, setSelectedEntityIds] = useState<string[]>([]);
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetch('/api/folders')
+      .then((res) => res.json())
+      .then(setFolders);
+
+    fetch('/api/entities')
+      .then((res) => res.json())
+      .then(setEntities);
+  }, []);
+
+  // Get all descendant folder IDs for filtering
+  const getDescendantIds = (folderId: string): string[] => {
+    const children = folders.filter((f) => f.parentId === folderId);
+    return children.flatMap((c) => [c.id, ...getDescendantIds(c.id)]);
+  };
+
+  // Filter entities by selected folder
+  const filteredEntities = useMemo(() => {
+    if (selectedFolderId === null) {
+      return entities; // All items
+    }
+    const validIds = [selectedFolderId, ...getDescendantIds(selectedFolderId)];
+    return entities.filter((e) => e.folderId && validIds.includes(e.folderId));
+  }, [entities, folders, selectedFolderId]);
+
+  const handleSelectEntity = (id: string, multi: boolean) => {
+    if (multi) {
+      setSelectedEntityIds((prev) =>
+        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      );
+    } else {
+      setSelectedEntityIds([id]);
+    }
+  };
+
+  const handleCreateFolder = (name: string, parentId: string | null) => {
+    const newFolder: Folder = {
+      id: `folder-${Date.now()}`,
+      name,
+      parentId,
+    };
+    setFolders((prev) => [...prev, newFolder]);
+  };
+
+  const handleCreateEntity = () => {
+    const title = prompt('Entity name:');
+    if (title?.trim()) {
+      const newEntity: EntitySummary = {
+        id: `entity-${Date.now()}`,
+        title: title.trim(),
+        folderId: selectedFolderId,
+        tags: [],
+        createdAt: new Date().toISOString(),
+        modifiedAt: new Date().toISOString(),
+        stats: { nodeCount: 0, edgeCount: 0, pageCount: 0 },
+      };
+      setEntities((prev) => [...prev, newEntity]);
+    }
+  };
+
+  const totalNodes = entities.reduce((sum, e) => sum + e.stats.nodeCount, 0);
+
   return (
     <div
       style={{
@@ -35,46 +106,26 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          {/* Folder Tree */}
-          <div
-            style={{
-              width: 180,
-              borderRight: `2px solid ${retro.inset}`,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <SectionHeader title="═ FOLDERS ═" />
-            <Inset style={{ flex: 1, margin: 4, overflow: 'auto' }}>
-              <div style={{ padding: 8 }}>
-                <div style={{ padding: '4px 0', cursor: 'pointer' }}>▼ All Items</div>
-                <div style={{ padding: '4px 0', paddingLeft: 12, cursor: 'pointer' }}>
-                  ▶ Research
-                </div>
-                <div style={{ padding: '4px 0', paddingLeft: 12, cursor: 'pointer' }}>▶ Work</div>
-              </div>
-            </Inset>
-            <div style={{ padding: 4 }}>
-              <Button style={{ width: '100%', fontSize: 11 }}>+ New Folder</Button>
-            </div>
-          </div>
+          <FolderTree
+            folders={folders}
+            selectedFolderId={selectedFolderId}
+            onSelectFolder={setSelectedFolderId}
+            onCreateFolder={handleCreateFolder}
+          />
 
-          {/* Entity List */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <SectionHeader title="═ KNOWLEDGE ENTITIES ═" />
-            <Inset style={{ flex: 1, margin: 4, overflow: 'auto' }}>
-              <div style={{ padding: 8, color: retro.darkGray, fontSize: 12 }}>
-                No entities yet. Click "+ New" to create one.
-              </div>
-            </Inset>
-          </div>
+          <EntityList
+            entities={filteredEntities}
+            selectedIds={selectedEntityIds}
+            onSelectEntity={handleSelectEntity}
+            onCreateEntity={handleCreateEntity}
+          />
         </div>
 
         <StatusBar
           segments={[
             { content: 'Ready', flex: 1 },
-            { content: '0 entities' },
-            { content: '0 nodes' },
+            { content: `${entities.length} entities` },
+            { content: `${totalNodes} nodes` },
           ]}
         />
       </Window>
