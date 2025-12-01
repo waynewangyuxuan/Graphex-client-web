@@ -1,14 +1,16 @@
-import { CSSProperties, ReactNode } from 'react';
+import { CSSProperties, ReactNode, MouseEventHandler } from 'react';
 import { retro } from '@/styles/retro';
 
 interface WindowProps {
   children: ReactNode;
   style?: CSSProperties;
+  onClick?: MouseEventHandler<HTMLDivElement>;
 }
 
-export function Window({ children, style = {} }: WindowProps) {
+export function Window({ children, style = {}, onClick }: WindowProps) {
   return (
     <div
+      onClick={onClick}
       style={{
         display: 'flex',
         flexDirection: 'column',

@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import type { Folder } from '@/types';
 import { retro } from '@/styles/retro';
-import { Inset, Button, SectionHeader } from '@/components/retro';
+import { Inset, Button, SectionHeader, ContextMenu } from '@/components/retro';
 
 interface FolderTreeProps {
   folders: Folder[];
   selectedFolderId: string | null;
   onSelectFolder: (folderId: string | null) => void;
   onCreateFolder: (name: string, parentId: string | null) => void;
+  onRenameFolder: (id: string, name: string) => void;
+  onDeleteFolder: (id: string) => void;
+  onDropEntities: (entityIds: string[], folderId: string | null) => void;
 }
 
 export function FolderTree({
@@ -15,8 +18,17 @@ export function FolderTree({
   selectedFolderId,
   onSelectFolder,
   onCreateFolder,
+  onRenameFolder,
+  onDeleteFolder,
+  onDropEntities,
 }: FolderTreeProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    folderId: string | null;
+  } | null>(null);
 
   const toggleExpand = (folderId: string) => {
     setExpandedIds((prev) => {
@@ -33,8 +45,33 @@ export function FolderTree({
   const handleNewFolder = () => {
     const name = prompt('Folder name:');
     if (name?.trim()) {
-      onCreateFolder(name.trim(), null);
+      onCreateFolder(name.trim(), selectedFolderId);
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent, folderId: string | null) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverId(folderId);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverId(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, folderId: string | null) => {
+    e.preventDefault();
+    setDragOverId(null);
+    const data = e.dataTransfer.getData('entityIds');
+    if (data) {
+      const entityIds = JSON.parse(data) as string[];
+      onDropEntities(entityIds, folderId);
+    }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, folderId: string | null) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, folderId });
   };
 
   // Build tree structure
@@ -45,6 +82,7 @@ export function FolderTree({
   const renderFolder = (folder: Folder, depth: number = 0) => {
     const isExpanded = expandedIds.has(folder.id);
     const isSelected = selectedFolderId === folder.id;
+    const isDragOver = dragOverId === folder.id;
     const children = getChildren(folder.id);
     const hasKids = hasChildren(folder.id);
 
@@ -52,16 +90,21 @@ export function FolderTree({
       <div key={folder.id}>
         <div
           onClick={() => onSelectFolder(folder.id)}
+          onContextMenu={(e) => handleContextMenu(e, folder.id)}
+          onDragOver={(e) => handleDragOver(e, folder.id)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, folder.id)}
           style={{
             padding: '4px 8px',
             paddingLeft: 8 + depth * 16,
             cursor: 'pointer',
-            background: isSelected ? retro.blue : 'transparent',
-            color: isSelected ? retro.white : retro.black,
+            background: isDragOver ? retro.highlight : isSelected ? retro.blue : 'transparent',
+            color: isSelected && !isDragOver ? retro.white : retro.black,
             display: 'flex',
             alignItems: 'center',
             gap: 4,
             fontSize: 12,
+            border: isDragOver ? `1px dashed ${retro.amber}` : '1px solid transparent',
           }}
         >
           <span
@@ -72,11 +115,12 @@ export function FolderTree({
             style={{
               width: 12,
               cursor: hasKids ? 'pointer' : 'default',
-              color: isSelected ? retro.white : retro.darkGray,
+              color: isSelected && !isDragOver ? retro.white : retro.darkGray,
             }}
           >
             {hasKids ? (isExpanded ? '▼' : '▶') : ''}
           </span>
+          <span>📁</span>
           <span>{folder.name}</span>
         </div>
         {isExpanded && children.map((child) => renderFolder(child, depth + 1))}
@@ -85,6 +129,46 @@ export function FolderTree({
   };
 
   const isAllSelected = selectedFolderId === null;
+  const isAllDragOver = dragOverId === 'all';
+
+  const contextMenuItems = contextMenu?.folderId
+    ? [
+        {
+          label: 'New Subfolder',
+          onClick: () => {
+            const name = prompt('Folder name:');
+            if (name?.trim()) onCreateFolder(name.trim(), contextMenu.folderId);
+          },
+        },
+        {
+          label: 'Rename',
+          onClick: () => {
+            const folder = folders.find((f) => f.id === contextMenu.folderId);
+            const name = prompt('New name:', folder?.name);
+            if (name?.trim() && contextMenu.folderId) {
+              onRenameFolder(contextMenu.folderId, name.trim());
+            }
+          },
+        },
+        { label: '', onClick: () => {}, divider: true },
+        {
+          label: 'Delete',
+          onClick: () => {
+            if (contextMenu.folderId && confirm('Delete this folder?')) {
+              onDeleteFolder(contextMenu.folderId);
+            }
+          },
+        },
+      ]
+    : [
+        {
+          label: 'New Folder',
+          onClick: () => {
+            const name = prompt('Folder name:');
+            if (name?.trim()) onCreateFolder(name.trim(), null);
+          },
+        },
+      ];
 
   return (
     <div
@@ -100,16 +184,24 @@ export function FolderTree({
         {/* All Items */}
         <div
           onClick={() => onSelectFolder(null)}
+          onContextMenu={(e) => handleContextMenu(e, null)}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOverId('all');
+          }}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, null)}
           style={{
             padding: '4px 8px',
             cursor: 'pointer',
-            background: isAllSelected ? retro.blue : 'transparent',
-            color: isAllSelected ? retro.white : retro.black,
+            background: isAllDragOver ? retro.highlight : isAllSelected ? retro.blue : 'transparent',
+            color: isAllSelected && !isAllDragOver ? retro.white : retro.black,
             display: 'flex',
             alignItems: 'center',
             gap: 4,
             fontSize: 12,
             fontWeight: 600,
+            border: isAllDragOver ? `1px dashed ${retro.amber}` : '1px solid transparent',
           }}
         >
           <span style={{ width: 12 }}>◆</span>
@@ -124,6 +216,16 @@ export function FolderTree({
           + New Folder
         </Button>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenuItems}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 }
