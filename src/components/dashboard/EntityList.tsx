@@ -12,6 +12,8 @@ interface EntityListProps {
   entities: EntitySummary[];
   selectedIds: string[];
   currentFolderName: string | null;
+  showAllItems: boolean;
+  onToggleShowAll: () => void;
   onSelectEntity: (id: string, multi: boolean) => void;
   onCreateEntity: () => void;
   onCreateFolder: () => void;
@@ -37,6 +39,8 @@ export function EntityList({
   entities,
   selectedIds,
   currentFolderName,
+  showAllItems,
+  onToggleShowAll,
   onSelectEntity,
   onCreateEntity,
   onCreateFolder,
@@ -137,7 +141,7 @@ export function EntityList({
           borderBottom: `1px solid ${retro.inset}`,
         }}
       >
-        ═ {currentFolderName ? currentFolderName.toUpperCase() : 'ALL ITEMS'} ═
+        ═ {currentFolderName ? currentFolderName.toUpperCase() : 'HOME'}{showAllItems ? ' (ALL)' : ''} ═
       </div>
 
       {/* Toolbar */}
@@ -179,6 +183,28 @@ export function EntityList({
         <Button onClick={onCreateEntity} style={{ fontSize: 10, padding: '2px 8px' }}>
           + New
         </Button>
+
+        <div style={{ width: 1, height: 16, background: retro.gray }} />
+
+        {/* Show All toggle */}
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            fontSize: 10,
+            cursor: 'pointer',
+            userSelect: 'none',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={showAllItems}
+            onChange={onToggleShowAll}
+            style={{ cursor: 'pointer' }}
+          />
+          Show All
+        </label>
 
         {/* Spacer */}
         <div style={{ flex: 1 }} />

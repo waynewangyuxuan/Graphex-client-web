@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [entities, setEntities] = useState<EntitySummary[]>([]);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedEntityIds, setSelectedEntityIds] = useState<string[]>([]);
+  const [showAllItems, setShowAllItems] = useState(false);
 
   // Modal state for "Move to" dialog
   const [moveModalOpen, setMoveModalOpen] = useState(false);
@@ -48,12 +49,24 @@ export default function Dashboard() {
 
   // Filter entities by selected folder
   const filteredEntities = useMemo(() => {
-    if (selectedFolderId === null) {
-      return entities; // All items
+    if (showAllItems) {
+      // Show all items regardless of folder structure
+      if (selectedFolderId === null) {
+        return entities;
+      }
+      // Show all items in this folder and descendants
+      const validIds = [selectedFolderId, ...getDescendantIds(selectedFolderId)];
+      return entities.filter((e) => e.folderId && validIds.includes(e.folderId));
     }
-    const validIds = [selectedFolderId, ...getDescendantIds(selectedFolderId)];
-    return entities.filter((e) => e.folderId && validIds.includes(e.folderId));
-  }, [entities, folders, selectedFolderId]);
+
+    // Show only items directly in the selected folder
+    if (selectedFolderId === null) {
+      // Home: show only root-level items (not in any folder)
+      return entities.filter((e) => e.folderId === null);
+    }
+    // Folder: show only items directly in this folder
+    return entities.filter((e) => e.folderId === selectedFolderId);
+  }, [entities, folders, selectedFolderId, showAllItems]);
 
   // Entity handlers
   const handleSelectEntity = (id: string, multi: boolean) => {
@@ -242,6 +255,8 @@ export default function Dashboard() {
             entities={filteredEntities}
             selectedIds={selectedEntityIds}
             currentFolderName={selectedFolderId ? folders.find(f => f.id === selectedFolderId)?.name ?? null : null}
+            showAllItems={showAllItems}
+            onToggleShowAll={() => setShowAllItems(prev => !prev)}
             onSelectEntity={handleSelectEntity}
             onCreateEntity={handleCreateEntity}
             onCreateFolder={() => setNewFolderModalOpen(true)}
