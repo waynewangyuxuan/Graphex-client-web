@@ -47,6 +47,20 @@ export default function Dashboard() {
     return [...getBreadcrumbPath(folder.parentId), folder];
   };
 
+  // Filter folders to show in the current view (subfolders of selected folder)
+  const filteredFolders = useMemo(() => {
+    if (showAllItems) {
+      // When showing all, show all folders under current folder and descendants
+      if (selectedFolderId === null) {
+        return folders; // All folders
+      }
+      const validIds = [selectedFolderId, ...getDescendantIds(selectedFolderId)];
+      return folders.filter((f) => f.parentId && validIds.includes(f.parentId));
+    }
+    // Show only direct subfolders
+    return folders.filter((f) => f.parentId === selectedFolderId);
+  }, [folders, selectedFolderId, showAllItems]);
+
   // Filter entities by selected folder
   const filteredEntities = useMemo(() => {
     if (showAllItems) {
@@ -252,16 +266,20 @@ export default function Dashboard() {
           />
 
           <EntityList
+            folders={filteredFolders}
             entities={filteredEntities}
             selectedIds={selectedEntityIds}
             currentFolderName={selectedFolderId ? folders.find(f => f.id === selectedFolderId)?.name ?? null : null}
             showAllItems={showAllItems}
             onToggleShowAll={() => setShowAllItems(prev => !prev)}
-            onSelectEntity={handleSelectEntity}
+            onSelectItem={handleSelectEntity}
+            onNavigateToFolder={setSelectedFolderId}
             onCreateEntity={handleCreateEntity}
             onCreateFolder={() => setNewFolderModalOpen(true)}
             onDeleteEntities={handleDeleteEntities}
-            onMoveEntities={handleMoveEntities}
+            onMoveItems={handleMoveEntities}
+            onRenameFolder={handleRenameFolder}
+            onDeleteFolder={handleDeleteFolder}
           />
         </div>
 
