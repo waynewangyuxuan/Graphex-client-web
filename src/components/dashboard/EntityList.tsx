@@ -11,8 +11,10 @@ type SortOrder = 'asc' | 'desc';
 interface EntityListProps {
   entities: EntitySummary[];
   selectedIds: string[];
+  currentFolderName: string | null;
   onSelectEntity: (id: string, multi: boolean) => void;
   onCreateEntity: () => void;
+  onCreateFolder: () => void;
   onDeleteEntities: (ids: string[]) => void;
   onMoveEntities: (ids: string[]) => void;
   onDragStart?: (ids: string[]) => void;
@@ -34,8 +36,10 @@ function formatRelativeTime(dateStr: string): string {
 export function EntityList({
   entities,
   selectedIds,
+  currentFolderName,
   onSelectEntity,
   onCreateEntity,
+  onCreateFolder,
   onDeleteEntities,
   onMoveEntities,
   onDragStart,
@@ -44,7 +48,7 @@ export function EntityList({
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [sortField, setSortField] = useState<SortField>('modifiedAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; isEmptySpace: boolean } | null>(null);
 
   // Sort entities
   const sortedEntities = [...entities].sort((a, b) => {
@@ -76,10 +80,19 @@ export function EntityList({
 
   const handleContextMenu = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!selectedIds.includes(id)) {
       onSelectEntity(id, false);
     }
-    setContextMenu({ x: e.clientX, y: e.clientY });
+    setContextMenu({ x: e.clientX, y: e.clientY, isEmptySpace: false });
+  };
+
+  const handleEmptySpaceContextMenu = (e: React.MouseEvent) => {
+    // Only trigger if clicking on empty space, not on items
+    if (e.target === e.currentTarget || (e.target as HTMLElement).closest('table, .icon-grid') === null) {
+      e.preventDefault();
+      setContextMenu({ x: e.clientX, y: e.clientY, isEmptySpace: true });
+    }
   };
 
   const handleOpen = () => {
@@ -95,7 +108,7 @@ export function EntityList({
     onDragStart?.(ids);
   };
 
-  const contextMenuItems = [
+  const itemContextMenuItems = [
     { label: 'Open', onClick: handleOpen, disabled: selectedIds.length !== 1 },
     { label: '', onClick: () => {}, divider: true },
     { label: 'Move to...', onClick: () => onMoveEntities(selectedIds) },
@@ -104,6 +117,11 @@ export function EntityList({
       label: `Delete${selectedIds.length > 1 ? ` (${selectedIds.length})` : ''}`,
       onClick: () => onDeleteEntities(selectedIds),
     },
+  ];
+
+  const emptySpaceContextMenuItems = [
+    { label: 'New Knowledge Entity', onClick: onCreateEntity },
+    { label: 'New Folder', onClick: onCreateFolder },
   ];
 
   return (
@@ -119,7 +137,7 @@ export function EntityList({
           borderBottom: `1px solid ${retro.inset}`,
         }}
       >
-        ═ KNOWLEDGE ENTITIES ═
+        ═ {currentFolderName ? currentFolderName.toUpperCase() : 'ALL ITEMS'} ═
       </div>
 
       {/* Toolbar */}
@@ -208,7 +226,7 @@ export function EntityList({
       </div>
 
       {/* Content area */}
-      <Inset style={{ flex: 1, margin: 4, overflow: 'auto' }}>
+      <Inset style={{ flex: 1, margin: 4, overflow: 'auto' }} onContextMenu={handleEmptySpaceContextMenu}>
         {sortedEntities.length === 0 ? (
           <div style={{ padding: 16, color: retro.darkGray, fontSize: 12, textAlign: 'center' }}>
             No entities yet. Click "+ New" to create one.
@@ -322,7 +340,7 @@ export function EntityList({
         <ContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
-          items={contextMenuItems}
+          items={contextMenu.isEmptySpace ? emptySpaceContextMenuItems : itemContextMenuItems}
           onClose={() => setContextMenu(null)}
         />
       )}

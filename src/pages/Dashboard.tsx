@@ -15,8 +15,9 @@ export default function Dashboard() {
   const [entitiesToMove, setEntitiesToMove] = useState<string[]>([]);
   const [moveTargetFolderId, setMoveTargetFolderId] = useState<string | null>(null);
 
-  // Modal state for new entity and delete confirmation
+  // Modal state for new entity, new folder, and delete confirmation
   const [newEntityModalOpen, setNewEntityModalOpen] = useState(false);
+  const [newFolderModalOpen, setNewFolderModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [entitiesToDelete, setEntitiesToDelete] = useState<string[]>([]);
 
@@ -138,6 +139,12 @@ export default function Dashboard() {
     }
   };
 
+  const handleMoveFolder = (folderId: string, newParentId: string | null) => {
+    setFolders((prev) =>
+      prev.map((f) => (f.id === folderId ? { ...f, parentId: newParentId } : f))
+    );
+  };
+
   const handleDropEntities = (entityIds: string[], targetFolderId: string | null) => {
     setEntities((prev) =>
       prev.map((e) => (entityIds.includes(e.id) ? { ...e, folderId: targetFolderId } : e))
@@ -199,7 +206,7 @@ export default function Dashboard() {
               fontWeight: selectedFolderId ? 400 : 600,
             }}
           >
-            📁 Library
+            🏠 Home
           </span>
           {breadcrumb.map((folder, i) => (
             <span key={folder.id} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -227,14 +234,17 @@ export default function Dashboard() {
             onCreateFolder={handleCreateFolder}
             onRenameFolder={handleRenameFolder}
             onDeleteFolder={handleDeleteFolder}
+            onMoveFolder={handleMoveFolder}
             onDropEntities={handleDropEntities}
           />
 
           <EntityList
             entities={filteredEntities}
             selectedIds={selectedEntityIds}
+            currentFolderName={selectedFolderId ? folders.find(f => f.id === selectedFolderId)?.name ?? null : null}
             onSelectEntity={handleSelectEntity}
             onCreateEntity={handleCreateEntity}
+            onCreateFolder={() => setNewFolderModalOpen(true)}
             onDeleteEntities={handleDeleteEntities}
             onMoveEntities={handleMoveEntities}
           />
@@ -286,7 +296,7 @@ export default function Dashboard() {
               fontSize: 12,
             }}
           >
-            📁 Library (root)
+            🏠 Home (root)
           </div>
           {folders.map((folder) => (
             <div
@@ -315,6 +325,17 @@ export default function Dashboard() {
         isOpen={newEntityModalOpen}
         onClose={() => setNewEntityModalOpen(false)}
         onSubmit={handleConfirmCreateEntity}
+        submitLabel="Create"
+      />
+
+      {/* New Folder Modal */}
+      <InputModal
+        title="New Folder"
+        label="Folder name:"
+        placeholder="Enter folder name"
+        isOpen={newFolderModalOpen}
+        onClose={() => setNewFolderModalOpen(false)}
+        onSubmit={(name: string) => handleCreateFolder(name, selectedFolderId)}
         submitLabel="Create"
       />
 

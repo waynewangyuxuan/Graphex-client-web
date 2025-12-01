@@ -10,6 +10,7 @@ interface FolderTreeProps {
   onCreateFolder: (name: string, parentId: string | null) => void;
   onRenameFolder: (id: string, name: string) => void;
   onDeleteFolder: (id: string) => void;
+  onMoveFolder: (folderId: string, newParentId: string | null) => void;
   onDropEntities: (entityIds: string[], folderId: string | null) => void;
 }
 
@@ -20,6 +21,7 @@ export function FolderTree({
   onCreateFolder,
   onRenameFolder,
   onDeleteFolder,
+  onMoveFolder,
   onDropEntities,
 }: FolderTreeProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -51,6 +53,16 @@ export function FolderTree({
     setNewFolderModal({ parentId: selectedFolderId });
   };
 
+  // Check if targetId is a descendant of folderId (to prevent circular refs)
+  const isDescendant = (folderId: string, targetId: string | null): boolean => {
+    if (!targetId) return false;
+    const target = folders.find((f) => f.id === targetId);
+    if (!target) return false;
+    if (target.parentId === folderId) return true;
+    if (target.parentId) return isDescendant(folderId, target.parentId);
+    return false;
+  };
+
   const handleDragOver = (e: React.DragEvent, folderId: string | null) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -61,13 +73,31 @@ export function FolderTree({
     setDragOverId(null);
   };
 
-  const handleDrop = (e: React.DragEvent, folderId: string | null) => {
+  const handleFolderDragStart = (e: React.DragEvent, folderId: string) => {
+    e.dataTransfer.setData('folderId', folderId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, targetFolderId: string | null) => {
     e.preventDefault();
+    e.stopPropagation();
     setDragOverId(null);
-    const data = e.dataTransfer.getData('entityIds');
-    if (data) {
-      const entityIds = JSON.parse(data) as string[];
-      onDropEntities(entityIds, folderId);
+
+    // Check for folder drop first
+    const draggedFolderId = e.dataTransfer.getData('folderId');
+    if (draggedFolderId) {
+      // Prevent dropping on itself or its descendants
+      if (draggedFolderId === targetFolderId) return;
+      if (targetFolderId && isDescendant(draggedFolderId, targetFolderId)) return;
+      onMoveFolder(draggedFolderId, targetFolderId);
+      return;
+    }
+
+    // Check for entity drop
+    const entityData = e.dataTransfer.getData('entityIds');
+    if (entityData) {
+      const entityIds = JSON.parse(entityData) as string[];
+      onDropEntities(entityIds, targetFolderId);
     }
   };
 
@@ -91,15 +121,17 @@ export function FolderTree({
     return (
       <div key={folder.id}>
         <div
+          draggable
           onClick={() => onSelectFolder(folder.id)}
           onContextMenu={(e) => handleContextMenu(e, folder.id)}
+          onDragStart={(e) => handleFolderDragStart(e, folder.id)}
           onDragOver={(e) => handleDragOver(e, folder.id)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, folder.id)}
           style={{
             padding: '4px 8px',
             paddingLeft: 8 + depth * 16,
-            cursor: 'pointer',
+            cursor: 'grab',
             background: isDragOver ? retro.highlight : isSelected ? retro.blue : 'transparent',
             color: isSelected && !isDragOver ? retro.white : retro.black,
             display: 'flex',
@@ -181,7 +213,7 @@ export function FolderTree({
     >
       <SectionHeader title="═ FOLDERS ═" />
       <Inset style={{ flex: 1, margin: 4, overflow: 'auto' }}>
-        {/* All Items */}
+        {/* Home / Root */}
         <div
           onClick={() => onSelectFolder(null)}
           onContextMenu={(e) => handleContextMenu(e, null)}
@@ -204,8 +236,8 @@ export function FolderTree({
             border: isAllDragOver ? `1px dashed ${retro.amber}` : '1px solid transparent',
           }}
         >
-          <span style={{ width: 12 }}>◆</span>
-          <span>All Items</span>
+          <span style={{ width: 12 }}>🏠</span>
+          <span>Home</span>
         </div>
 
         {/* Folder tree */}
@@ -234,7 +266,7 @@ export function FolderTree({
         placeholder="Enter folder name"
         isOpen={newFolderModal !== null}
         onClose={() => setNewFolderModal(null)}
-        onSubmit={(name) => onCreateFolder(name, newFolderModal?.parentId ?? null)}
+        onSubmit={(name: string) => onCreateFolder(name, newFolderModal?.parentId ?? null)}
         submitLabel="Create"
       />
 
@@ -245,7 +277,7 @@ export function FolderTree({
         defaultValue={renameModal?.name ?? ''}
         isOpen={renameModal !== null}
         onClose={() => setRenameModal(null)}
-        onSubmit={(name) => {
+        onSubmit={(name: string) => {
           if (renameModal) onRenameFolder(renameModal.id, name);
         }}
         submitLabel="Rename"
