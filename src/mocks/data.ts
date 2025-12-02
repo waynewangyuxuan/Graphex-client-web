@@ -8,6 +8,15 @@ export const folders: Folder[] = [
 
 export const entities: EntitySummary[] = [
   {
+    id: 'entity-0',
+    title: 'Getting Started',
+    folderId: null,
+    tags: ['intro'],
+    createdAt: '2024-01-01T10:00:00Z',
+    modifiedAt: '2024-01-01T10:00:00Z',
+    stats: { nodeCount: 3, edgeCount: 2, pageCount: 5 },
+  },
+  {
     id: 'entity-1',
     title: 'ML Fundamentals',
     folderId: 'folder-2',

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { retro } from '@/styles/retro';
+import { cyber } from '@/styles/cyber';
 
 interface SelectOption {
   value: string;
@@ -15,6 +15,7 @@ interface SelectProps {
 
 export function Select({ value, onChange, options, style }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find((opt) => opt.value === value);
@@ -48,22 +49,29 @@ export function Select({ value, onChange, options, style }: SelectProps) {
       {/* Select button */}
       <div
         onClick={() => setIsOpen(!isOpen)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         style={{
           display: 'flex',
           alignItems: 'center',
-          background: retro.cream,
-          border: '2px solid',
-          borderColor: `${retro.inset} ${retro.outset} ${retro.outset} ${retro.inset}`,
+          background: hovered ? cyber.black : cyber.white,
+          color: hovered ? cyber.white : cyber.black,
+          border: cyber.border,
+          boxShadow: hovered ? `2px 2px 0 ${cyber.black}` : cyber.shadow,
+          transform: hovered ? 'translate(-1px, -1px)' : 'none',
           cursor: 'pointer',
-          fontFamily: retro.font,
+          fontFamily: cyber.fontDisplay,
           fontSize: 11,
+          fontWeight: 700,
+          textTransform: 'uppercase',
           minWidth: 100,
+          transition: 'all 0.1s ease',
         }}
       >
         <span
           style={{
             flex: 1,
-            padding: '3px 6px',
+            padding: '6px 10px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -73,9 +81,8 @@ export function Select({ value, onChange, options, style }: SelectProps) {
         </span>
         <span
           style={{
-            padding: '3px 6px',
-            borderLeft: `1px solid ${retro.gray}`,
-            background: retro.windowBg,
+            padding: '6px 10px',
+            borderLeft: cyber.borderLight,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -93,10 +100,10 @@ export function Select({ value, onChange, options, style }: SelectProps) {
             top: '100%',
             left: 0,
             right: 0,
-            marginTop: 1,
-            background: retro.cream,
-            border: '2px solid',
-            borderColor: `${retro.inset} ${retro.outset} ${retro.outset} ${retro.inset}`,
+            marginTop: 4,
+            background: cyber.white,
+            border: cyber.border,
+            boxShadow: cyber.shadow,
             zIndex: 100,
             maxHeight: 200,
             overflow: 'auto',
@@ -110,16 +117,19 @@ export function Select({ value, onChange, options, style }: SelectProps) {
                 setIsOpen(false);
               }}
               style={{
-                padding: '4px 8px',
+                padding: '8px 12px',
                 cursor: 'pointer',
-                fontFamily: retro.font,
+                fontFamily: cyber.fontDisplay,
                 fontSize: 11,
-                background: opt.value === value ? retro.blue : 'transparent',
-                color: opt.value === value ? retro.white : retro.black,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                background: opt.value === value ? cyber.black : 'transparent',
+                color: opt.value === value ? cyber.white : cyber.black,
+                transition: 'all 0.1s ease',
               }}
               onMouseEnter={(e) => {
                 if (opt.value !== value) {
-                  e.currentTarget.style.background = retro.highlight;
+                  e.currentTarget.style.background = cyber.gray;
                 }
               }}
               onMouseLeave={(e) => {

@@ -85,3 +85,8 @@ export interface Folder {
   name: string;
   parentId: string | null;
 }
+
+// Combined type for displaying both folders and entities in file navigator
+export type FileItem =
+  | { type: 'folder'; id: string; name: string; data: Folder }
+  | { type: 'entity'; id: string; name: string; data: EntitySummary };

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { retro } from '@/styles/retro';
+import { cyber } from '@/styles/cyber';
 import { Window } from './Window';
 import { TitleBar } from './TitleBar';
 import { Button } from './Button';
@@ -65,7 +65,7 @@ export function InputModal({
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
+        background: 'rgba(0, 0, 0, 0.7)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -74,16 +74,18 @@ export function InputModal({
       onClick={onClose}
     >
       <Window
-        style={{ width: 320 }}
+        style={{ width: 360 }}
         onClick={(e) => e.stopPropagation()}
       >
         <TitleBar title={title} onClose={onClose} />
-        <div style={{ padding: 16 }}>
+        <div style={{ padding: 20 }}>
           <label
             style={{
               display: 'block',
               fontSize: 12,
-              fontFamily: retro.font,
+              fontFamily: cyber.fontDisplay,
+              fontWeight: 700,
+              textTransform: 'uppercase',
               marginBottom: 8,
             }}
           >
@@ -97,26 +99,26 @@ export function InputModal({
             placeholder={placeholder}
             style={{
               width: '100%',
-              padding: '6px 8px',
-              fontSize: 12,
-              fontFamily: retro.font,
-              background: retro.cream,
-              border: '2px solid',
-              borderColor: `${retro.inset} ${retro.outset} ${retro.outset} ${retro.inset}`,
+              padding: '10px 12px',
+              fontSize: 14,
+              fontFamily: cyber.fontBody,
+              background: cyber.white,
+              border: cyber.border,
               outline: 'none',
             }}
           />
         </div>
         <div
           style={{
-            padding: '8px 16px 16px',
+            padding: '12px 20px 20px',
             display: 'flex',
             justifyContent: 'flex-end',
-            gap: 8,
+            gap: 12,
+            borderTop: cyber.border,
           }}
         >
           <Button onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSubmit} active disabled={!value.trim()}>
+          <Button onClick={handleSubmit} variant="primary" disabled={!value.trim()}>
             {submitLabel}
           </Button>
         </div>

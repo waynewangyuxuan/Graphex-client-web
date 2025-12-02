@@ -1,5 +1,5 @@
 import { CSSProperties, ReactNode, MouseEventHandler } from 'react';
-import { retro } from '@/styles/retro';
+import { cyber } from '@/styles/cyber';
 
 interface InsetProps {
   children: ReactNode;
@@ -14,9 +14,8 @@ export function Inset({ children, style = {}, className, onContextMenu }: InsetP
       className={className}
       onContextMenu={onContextMenu}
       style={{
-        background: retro.cream,
-        border: '2px solid',
-        borderColor: `${retro.inset} ${retro.outset} ${retro.outset} ${retro.inset}`,
+        background: cyber.white,
+        border: cyber.border,
         ...style,
       }}
     >

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Folder } from '@/types';
-import { retro } from '@/styles/retro';
-import { Inset, Button, SectionHeader, ContextMenu, InputModal, ConfirmModal } from '@/components/retro';
+import { cyber } from '@/styles/cyber';
+import { Inset, Button, SectionHeader, ContextMenu, InputModal, ConfirmModal } from '@/components/cyber';
 
 interface FolderTreeProps {
   folders: Folder[];
@@ -132,13 +132,13 @@ export function FolderTree({
             padding: '4px 8px',
             paddingLeft: 8 + depth * 16,
             cursor: 'grab',
-            background: isDragOver ? retro.highlight : isSelected ? retro.blue : 'transparent',
-            color: isSelected && !isDragOver ? retro.white : retro.black,
+            background: isDragOver ? cyber.gray : isSelected ? cyber.black : 'transparent',
+            color: isSelected && !isDragOver ? cyber.white : cyber.black,
             display: 'flex',
             alignItems: 'center',
             gap: 4,
             fontSize: 12,
-            border: isDragOver ? `1px dashed ${retro.amber}` : '1px solid transparent',
+            border: isDragOver ? `1px dashed ${cyber.orange}` : '1px solid transparent',
           }}
         >
           <span
@@ -149,7 +149,7 @@ export function FolderTree({
             style={{
               width: 12,
               cursor: hasKids ? 'pointer' : 'default',
-              color: isSelected && !isDragOver ? retro.white : retro.darkGray,
+              color: isSelected && !isDragOver ? cyber.white : cyber.darkGray,
             }}
           >
             {hasKids ? (isExpanded ? '▼' : '▶') : ''}
@@ -205,8 +205,8 @@ export function FolderTree({
   return (
     <div
       style={{
-        width: 180,
-        borderRight: `2px solid ${retro.inset}`,
+        width: 200,
+        borderRight: cyber.border,
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -226,14 +226,14 @@ export function FolderTree({
           style={{
             padding: '4px 8px',
             cursor: 'pointer',
-            background: isAllDragOver ? retro.highlight : isAllSelected ? retro.blue : 'transparent',
-            color: isAllSelected && !isAllDragOver ? retro.white : retro.black,
+            background: isAllDragOver ? cyber.gray : isAllSelected ? cyber.black : 'transparent',
+            color: isAllSelected && !isAllDragOver ? cyber.white : cyber.black,
             display: 'flex',
             alignItems: 'center',
             gap: 4,
             fontSize: 12,
             fontWeight: 600,
-            border: isAllDragOver ? `1px dashed ${retro.amber}` : '1px solid transparent',
+            border: isAllDragOver ? `1px dashed ${cyber.orange}` : '1px solid transparent',
           }}
         >
           <span style={{ width: 12 }}>🏠</span>

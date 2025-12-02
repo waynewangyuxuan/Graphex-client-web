@@ -1,4 +1,4 @@
-import { retro } from '@/styles/retro';
+import { cyber } from '@/styles/cyber';
 
 interface TitleBarProps {
   title: string;
@@ -12,46 +12,60 @@ export function TitleBar({ title, onMinimize, onMaximize, onClose }: TitleBarPro
     { symbol: '_', onClick: onMinimize },
     { symbol: '□', onClick: onMaximize },
     { symbol: '×', onClick: onClose },
-  ];
+  ].filter((b) => b.onClick);
 
   return (
     <div
       style={{
-        background: `linear-gradient(90deg, ${retro.blue} 0%, ${retro.lightBlue} 100%)`,
-        padding: '4px 6px',
+        background: cyber.black,
+        padding: '8px 12px',
         display: 'flex',
         alignItems: 'center',
         userSelect: 'none',
+        borderBottom: cyber.border,
       }}
     >
       <span
         style={{
-          color: retro.white,
-          fontSize: 12,
+          color: cyber.white,
+          fontSize: 14,
           fontWeight: 700,
           flex: 1,
-          fontFamily: retro.font,
+          fontFamily: cyber.fontDisplay,
+          textTransform: 'uppercase',
+          letterSpacing: '-0.02em',
         }}
       >
         {title}
       </span>
-      <div style={{ display: 'flex', gap: 2 }}>
+      <div style={{ display: 'flex', gap: 4 }}>
         {buttons.map(({ symbol, onClick }, i) => (
           <button
             key={i}
             onClick={onClick}
             style={{
-              width: 18,
-              height: 18,
-              background: retro.windowBg,
-              border: `1px solid ${retro.black}`,
+              width: 20,
+              height: 20,
+              background: cyber.white,
+              border: `1px solid ${cyber.white}`,
               fontWeight: 700,
               fontSize: 12,
               cursor: onClick ? 'pointer' : 'default',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontFamily: retro.font,
+              fontFamily: cyber.fontDisplay,
+              transition: 'all 0.1s ease',
+            }}
+            onMouseEnter={(e) => {
+              if (onClick) {
+                e.currentTarget.style.background = symbol === '×' ? cyber.orange : cyber.black;
+                e.currentTarget.style.color = cyber.white;
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = cyber.white;
+              e.currentTarget.style.color = cyber.black;
             }}
           >
             {symbol}

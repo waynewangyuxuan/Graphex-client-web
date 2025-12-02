@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { retro } from '@/styles/retro';
+import { cyber } from '@/styles/cyber';
 import { Window } from './Window';
 import { TitleBar } from './TitleBar';
 import { Button } from './Button';
@@ -51,7 +51,7 @@ export function ConfirmModal({
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
+        background: 'rgba(0, 0, 0, 0.7)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -60,16 +60,16 @@ export function ConfirmModal({
       onClick={onClose}
     >
       <Window
-        style={{ width: 320 }}
+        style={{ width: 360 }}
         onClick={(e) => e.stopPropagation()}
       >
         <TitleBar title={title} onClose={onClose} />
-        <div style={{ padding: 16 }}>
+        <div style={{ padding: 20 }}>
           <p
             style={{
-              fontSize: 12,
-              fontFamily: retro.font,
-              lineHeight: 1.5,
+              fontSize: 14,
+              fontFamily: cyber.fontBody,
+              lineHeight: 1.6,
               margin: 0,
             }}
           >
@@ -78,17 +78,17 @@ export function ConfirmModal({
         </div>
         <div
           style={{
-            padding: '8px 16px 16px',
+            padding: '12px 20px 20px',
             display: 'flex',
             justifyContent: 'flex-end',
-            gap: 8,
+            gap: 12,
+            borderTop: cyber.border,
           }}
         >
           <Button onClick={onClose}>{cancelLabel}</Button>
           <Button
             onClick={handleConfirm}
-            active
-            style={danger ? { background: retro.red } : undefined}
+            variant={danger ? 'danger' : 'primary'}
           >
             {confirmLabel}
           </Button>

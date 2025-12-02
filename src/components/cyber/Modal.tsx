@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from 'react';
-import { retro } from '@/styles/retro';
+import { cyber } from '@/styles/cyber';
 import { Window } from './Window';
 import { TitleBar } from './TitleBar';
 import { Button } from './Button';
@@ -14,6 +14,7 @@ interface ModalProps {
     label: string;
     onClick: () => void;
     primary?: boolean;
+    danger?: boolean;
   }>;
 }
 
@@ -36,7 +37,7 @@ export function Modal({ title, children, isOpen, onClose, width = 400, actions }
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
+        background: 'rgba(0, 0, 0, 0.7)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -49,19 +50,33 @@ export function Modal({ title, children, isOpen, onClose, width = 400, actions }
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
         <TitleBar title={title} onClose={onClose} />
-        <div style={{ padding: 16, flex: 1, overflow: 'auto' }}>{children}</div>
+        <div
+          style={{
+            padding: 20,
+            flex: 1,
+            overflow: 'auto',
+            fontFamily: cyber.fontBody,
+            fontSize: 14,
+          }}
+        >
+          {children}
+        </div>
         {actions && actions.length > 0 && (
           <div
             style={{
-              padding: '8px 16px 16px',
+              padding: '12px 20px 20px',
               display: 'flex',
               justifyContent: 'flex-end',
-              gap: 8,
-              borderTop: `1px solid ${retro.gray}`,
+              gap: 12,
+              borderTop: cyber.border,
             }}
           >
             {actions.map((action, i) => (
-              <Button key={i} onClick={action.onClick} active={action.primary}>
+              <Button
+                key={i}
+                onClick={action.onClick}
+                variant={action.danger ? 'danger' : action.primary ? 'primary' : 'default'}
+              >
                 {action.label}
               </Button>
             ))}

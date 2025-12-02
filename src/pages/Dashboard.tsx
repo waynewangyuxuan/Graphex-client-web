@@ -1,103 +1,43 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Folder, EntitySummary } from '@/types';
-import { retro } from '@/styles/retro';
-import { Window, TitleBar, StatusBar, Modal, InputModal, ConfirmModal } from '@/components/retro';
-import { FolderTree, EntityList } from '@/components/dashboard';
+import { cyber } from '@/styles/cyber';
+import { Button, InputModal, ConfirmModal } from '@/components/cyber';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [entities, setEntities] = useState<EntitySummary[]>([]);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
-  const [selectedEntityIds, setSelectedEntityIds] = useState<string[]>([]);
-  const [showAllItems, setShowAllItems] = useState(false);
 
-  // Modal state for "Move to" dialog
-  const [moveModalOpen, setMoveModalOpen] = useState(false);
-  const [entitiesToMove, setEntitiesToMove] = useState<string[]>([]);
-  const [moveTargetFolderId, setMoveTargetFolderId] = useState<string | null>(null);
-
-  // Modal state for new entity, new folder, and delete confirmation
+  // Modal state
   const [newEntityModalOpen, setNewEntityModalOpen] = useState(false);
   const [newFolderModalOpen, setNewFolderModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [entitiesToDelete, setEntitiesToDelete] = useState<string[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'entity' | 'folder'; id: string } | null>(null);
 
   // Fetch data on mount
   useEffect(() => {
-    fetch('/api/folders')
-      .then((res) => res.json())
-      .then(setFolders);
-
-    fetch('/api/entities')
-      .then((res) => res.json())
-      .then(setEntities);
+    fetch('/api/folders').then((res) => res.json()).then(setFolders);
+    fetch('/api/entities').then((res) => res.json()).then(setEntities);
   }, []);
 
-  // Get all descendant folder IDs for filtering
-  const getDescendantIds = (folderId: string): string[] => {
-    const children = folders.filter((f) => f.parentId === folderId);
-    return children.flatMap((c) => [c.id, ...getDescendantIds(c.id)]);
-  };
+  // Get subfolders of current folder
+  const subfolders = useMemo(
+    () => folders.filter((f) => f.parentId === selectedFolderId),
+    [folders, selectedFolderId]
+  );
 
-  // Build breadcrumb path
-  const getBreadcrumbPath = (folderId: string | null): Folder[] => {
-    if (!folderId) return [];
-    const folder = folders.find((f) => f.id === folderId);
-    if (!folder) return [];
-    return [...getBreadcrumbPath(folder.parentId), folder];
-  };
+  // Get entities in current folder
+  const currentEntities = useMemo(
+    () => entities.filter((e) => e.folderId === selectedFolderId),
+    [entities, selectedFolderId]
+  );
 
-  // Filter folders to show in the current view (subfolders of selected folder)
-  const filteredFolders = useMemo(() => {
-    if (showAllItems) {
-      // When showing all, show all folders under current folder and descendants
-      if (selectedFolderId === null) {
-        return folders; // All folders
-      }
-      const validIds = [selectedFolderId, ...getDescendantIds(selectedFolderId)];
-      return folders.filter((f) => f.parentId && validIds.includes(f.parentId));
-    }
-    // Show only direct subfolders
-    return folders.filter((f) => f.parentId === selectedFolderId);
-  }, [folders, selectedFolderId, showAllItems]);
+  // Get current folder
+  const currentFolder = folders.find((f) => f.id === selectedFolderId);
 
-  // Filter entities by selected folder
-  const filteredEntities = useMemo(() => {
-    if (showAllItems) {
-      // Show all items regardless of folder structure
-      if (selectedFolderId === null) {
-        return entities;
-      }
-      // Show all items in this folder and descendants
-      const validIds = [selectedFolderId, ...getDescendantIds(selectedFolderId)];
-      return entities.filter((e) => e.folderId && validIds.includes(e.folderId));
-    }
-
-    // Show only items directly in the selected folder
-    if (selectedFolderId === null) {
-      // Home: show only root-level items (not in any folder)
-      return entities.filter((e) => e.folderId === null);
-    }
-    // Folder: show only items directly in this folder
-    return entities.filter((e) => e.folderId === selectedFolderId);
-  }, [entities, folders, selectedFolderId, showAllItems]);
-
-  // Entity handlers
-  const handleSelectEntity = (id: string, multi: boolean) => {
-    if (multi) {
-      setSelectedEntityIds((prev) =>
-        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-      );
-    } else {
-      setSelectedEntityIds([id]);
-    }
-  };
-
-  const handleCreateEntity = () => {
-    setNewEntityModalOpen(true);
-  };
-
-  const handleConfirmCreateEntity = (title: string) => {
+  // Handlers
+  const handleCreateEntity = (title: string) => {
     const newEntity: EntitySummary = {
       id: `entity-${Date.now()}`,
       title,
@@ -110,278 +50,225 @@ export default function Dashboard() {
     setEntities((prev) => [...prev, newEntity]);
   };
 
-  const handleDeleteEntities = (ids: string[]) => {
-    setEntitiesToDelete(ids);
-    setDeleteModalOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    setEntities((prev) => prev.filter((e) => !entitiesToDelete.includes(e.id)));
-    setSelectedEntityIds([]);
-    setEntitiesToDelete([]);
-  };
-
-  const handleMoveEntities = (ids: string[]) => {
-    setEntitiesToMove(ids);
-    setMoveTargetFolderId(null);
-    setMoveModalOpen(true);
-  };
-
-  const handleConfirmMove = () => {
-    setEntities((prev) =>
-      prev.map((e) =>
-        entitiesToMove.includes(e.id) ? { ...e, folderId: moveTargetFolderId } : e
-      )
-    );
-    setMoveModalOpen(false);
-    setEntitiesToMove([]);
-    setSelectedEntityIds([]);
-  };
-
-  // Folder handlers
-  const handleCreateFolder = (name: string, parentId: string | null) => {
+  const handleCreateFolder = (name: string) => {
     const newFolder: Folder = {
       id: `folder-${Date.now()}`,
       name,
-      parentId,
+      parentId: selectedFolderId,
     };
     setFolders((prev) => [...prev, newFolder]);
   };
 
-  const handleRenameFolder = (id: string, name: string) => {
-    setFolders((prev) => prev.map((f) => (f.id === id ? { ...f, name } : f)));
-  };
-
-  const handleDeleteFolder = (id: string) => {
-    // Move entities from deleted folder to parent or root
-    const folder = folders.find((f) => f.id === id);
-    setEntities((prev) =>
-      prev.map((e) => (e.folderId === id ? { ...e, folderId: folder?.parentId || null } : e))
-    );
-    // Remove folder and its children
-    const descendantIds = getDescendantIds(id);
-    setFolders((prev) => prev.filter((f) => f.id !== id && !descendantIds.includes(f.id)));
-    if (selectedFolderId === id || descendantIds.includes(selectedFolderId || '')) {
-      setSelectedFolderId(null);
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    if (deleteTarget.type === 'entity') {
+      setEntities((prev) => prev.filter((e) => e.id !== deleteTarget.id));
+    } else {
+      // Move entities to parent, delete folder
+      const folder = folders.find((f) => f.id === deleteTarget.id);
+      setEntities((prev) =>
+        prev.map((e) => (e.folderId === deleteTarget.id ? { ...e, folderId: folder?.parentId || null } : e))
+      );
+      setFolders((prev) => prev.filter((f) => f.id !== deleteTarget.id));
     }
+    setDeleteTarget(null);
   };
-
-  const handleMoveFolder = (folderId: string, newParentId: string | null) => {
-    setFolders((prev) =>
-      prev.map((f) => (f.id === folderId ? { ...f, parentId: newParentId } : f))
-    );
-  };
-
-  const handleDropEntities = (entityIds: string[], targetFolderId: string | null) => {
-    setEntities((prev) =>
-      prev.map((e) => (entityIds.includes(e.id) ? { ...e, folderId: targetFolderId } : e))
-    );
-    setSelectedEntityIds([]);
-  };
-
-  const totalNodes = entities.reduce((sum, e) => sum + e.stats.nodeCount, 0);
-  const breadcrumb = getBreadcrumbPath(selectedFolderId);
 
   return (
     <div
       style={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        background: retro.desktop,
-        fontFamily: retro.font,
-        padding: 8,
+        minHeight: '100vh',
+        background: cyber.concrete,
+        fontFamily: cyber.fontBody,
       }}
     >
-      <Window style={{ flex: 1 }}>
-        <TitleBar title="GRAPHEX.EXE — Library" />
-
-        {/* Menu Bar */}
-        <div
-          style={{
-            padding: '2px 4px',
-            borderBottom: `1px solid ${retro.inset}`,
-            display: 'flex',
-            gap: 16,
-            fontSize: 12,
-          }}
-        >
-          {['File', 'Edit', 'View', 'Help'].map((item) => (
-            <span key={item} style={{ cursor: 'pointer' }}>
-              {item}
-            </span>
-          ))}
-        </div>
-
-        {/* Breadcrumb / Path bar */}
-        <div
-          style={{
-            padding: '4px 8px',
-            borderBottom: `1px solid ${retro.gray}`,
-            fontSize: 11,
-            color: retro.darkGray,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-          }}
-        >
-          <span
-            onClick={() => setSelectedFolderId(null)}
-            style={{
-              cursor: 'pointer',
-              color: selectedFolderId ? retro.blue : retro.black,
-              fontWeight: selectedFolderId ? 400 : 600,
-            }}
-          >
-            🏠 Home
-          </span>
-          {breadcrumb.map((folder, i) => (
-            <span key={folder.id} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ color: retro.darkGray }}>/</span>
-              <span
-                onClick={() => setSelectedFolderId(folder.id)}
-                style={{
-                  cursor: 'pointer',
-                  color: i === breadcrumb.length - 1 ? retro.black : retro.blue,
-                  fontWeight: i === breadcrumb.length - 1 ? 600 : 400,
-                }}
-              >
-                {folder.name}
-              </span>
-            </span>
-          ))}
-        </div>
-
-        {/* Main Content */}
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          <FolderTree
-            folders={folders}
-            selectedFolderId={selectedFolderId}
-            onSelectFolder={setSelectedFolderId}
-            onCreateFolder={handleCreateFolder}
-            onRenameFolder={handleRenameFolder}
-            onDeleteFolder={handleDeleteFolder}
-            onMoveFolder={handleMoveFolder}
-            onDropEntities={handleDropEntities}
-          />
-
-          <EntityList
-            folders={filteredFolders}
-            entities={filteredEntities}
-            selectedIds={selectedEntityIds}
-            currentFolderName={selectedFolderId ? folders.find(f => f.id === selectedFolderId)?.name ?? null : null}
-            showAllItems={showAllItems}
-            onToggleShowAll={() => setShowAllItems(prev => !prev)}
-            onSelectItem={handleSelectEntity}
-            onNavigateToFolder={setSelectedFolderId}
-            onCreateEntity={handleCreateEntity}
-            onCreateFolder={() => setNewFolderModalOpen(true)}
-            onDeleteEntities={handleDeleteEntities}
-            onMoveItems={handleMoveEntities}
-            onRenameFolder={handleRenameFolder}
-            onDeleteFolder={handleDeleteFolder}
-          />
-        </div>
-
-        <StatusBar
-          segments={[
-            {
-              content: selectedEntityIds.length > 0 ? `${selectedEntityIds.length} selected` : 'Ready',
-              flex: 1,
-            },
-            { content: `${filteredEntities.length} items` },
-            { content: `${entities.length} total` },
-            { content: `${totalNodes} nodes` },
-          ]}
-        />
-      </Window>
-
-      {/* Move To Modal */}
-      <Modal
-        title="Move to..."
-        isOpen={moveModalOpen}
-        onClose={() => setMoveModalOpen(false)}
-        width={300}
-        actions={[
-          { label: 'Cancel', onClick: () => setMoveModalOpen(false) },
-          { label: 'Move', onClick: handleConfirmMove, primary: true },
-        ]}
+      {/* Header */}
+      <div
+        style={{
+          padding: '16px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          borderBottom: cyber.border,
+          background: cyber.white,
+        }}
       >
-        <div style={{ fontSize: 12, marginBottom: 12 }}>
-          Select destination folder for {entitiesToMove.length} item(s):
-        </div>
-        <div
+        <span
           style={{
-            border: `2px solid`,
-            borderColor: `${retro.inset} ${retro.outset} ${retro.outset} ${retro.inset}`,
-            background: retro.cream,
-            maxHeight: 200,
-            overflow: 'auto',
+            fontFamily: cyber.fontDisplay,
+            fontWeight: 700,
+            fontSize: 14,
+            textTransform: 'uppercase',
+            flex: 1,
           }}
         >
-          <div
-            onClick={() => setMoveTargetFolderId(null)}
-            style={{
-              padding: '6px 8px',
-              cursor: 'pointer',
-              background: moveTargetFolderId === null ? retro.blue : 'transparent',
-              color: moveTargetFolderId === null ? retro.white : retro.black,
-              fontSize: 12,
-            }}
-          >
-            🏠 Home (root)
-          </div>
-          {folders.map((folder) => (
+          GRAPHEX
+        </span>
+        <button
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: 18,
+          }}
+          title="Settings"
+        >
+          ⚙
+        </button>
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: 24, maxWidth: 1000, margin: '0 auto' }}>
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+          {selectedFolderId && (
+            <Button onClick={() => setSelectedFolderId(currentFolder?.parentId || null)}>
+              ← Back
+            </Button>
+          )}
+          <Button onClick={() => setNewEntityModalOpen(true)}>+ Entity</Button>
+          <Button onClick={() => setNewFolderModalOpen(true)}>+ Folder</Button>
+        </div>
+
+        {/* Grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: 16,
+          }}
+        >
+          {/* Folders */}
+          {subfolders.map((folder) => (
             <div
               key={folder.id}
-              onClick={() => setMoveTargetFolderId(folder.id)}
+              onClick={() => setSelectedFolderId(folder.id)}
               style={{
-                padding: '6px 8px',
-                paddingLeft: folder.parentId ? 24 : 8,
+                padding: 16,
+                background: cyber.white,
+                border: cyber.border,
                 cursor: 'pointer',
-                background: moveTargetFolderId === folder.id ? retro.blue : 'transparent',
-                color: moveTargetFolderId === folder.id ? retro.white : retro.black,
+                fontFamily: cyber.fontDisplay,
+                textTransform: 'uppercase',
                 fontSize: 12,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
               }}
             >
-              📁 {folder.name}
+              <span style={{ fontSize: 18 }}>📁</span>
+              <span style={{ flex: 1 }}>{folder.name}</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteTarget({ type: 'folder', id: folder.id });
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  opacity: 0.5,
+                }}
+              >
+                ×
+              </button>
             </div>
           ))}
-        </div>
-      </Modal>
 
-      {/* New Entity Modal */}
+          {/* Entities */}
+          {currentEntities.map((entity) => (
+            <div
+              key={entity.id}
+              onClick={() => navigate(`/entity/${entity.id}`)}
+              style={{
+                padding: 16,
+                background: cyber.white,
+                border: cyber.border,
+                boxShadow: cyber.shadow,
+                cursor: 'pointer',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: cyber.fontDisplay,
+                  textTransform: 'uppercase',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  marginBottom: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <span style={{ flex: 1 }}>{entity.title}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteTarget({ type: 'entity', id: entity.id });
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    opacity: 0.5,
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              <div style={{ fontSize: 11, color: cyber.darkGray }}>
+                {entity.stats.nodeCount} nodes · {entity.stats.pageCount} pages
+              </div>
+            </div>
+          ))}
+
+          {/* Empty state */}
+          {subfolders.length === 0 && currentEntities.length === 0 && (
+            <div
+              style={{
+                gridColumn: '1 / -1',
+                padding: 48,
+                textAlign: 'center',
+                color: cyber.darkGray,
+                fontSize: 12,
+                fontFamily: cyber.fontDisplay,
+                textTransform: 'uppercase',
+              }}
+            >
+              Empty. Create an entity or folder to get started.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modals */}
       <InputModal
-        title="New Knowledge Entity"
-        label="Entity name:"
+        title="New Entity"
+        label="Name:"
         placeholder="Enter entity name"
         isOpen={newEntityModalOpen}
         onClose={() => setNewEntityModalOpen(false)}
-        onSubmit={handleConfirmCreateEntity}
+        onSubmit={handleCreateEntity}
         submitLabel="Create"
       />
 
-      {/* New Folder Modal */}
       <InputModal
         title="New Folder"
-        label="Folder name:"
+        label="Name:"
         placeholder="Enter folder name"
         isOpen={newFolderModalOpen}
         onClose={() => setNewFolderModalOpen(false)}
-        onSubmit={(name: string) => handleCreateFolder(name, selectedFolderId)}
+        onSubmit={handleCreateFolder}
         submitLabel="Create"
       />
 
-      {/* Delete Confirmation Modal */}
       <ConfirmModal
-        title="Delete Items"
-        message={`Are you sure you want to delete ${entitiesToDelete.length} item(s)? This action cannot be undone.`}
-        isOpen={deleteModalOpen}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setEntitiesToDelete([]);
-        }}
-        onConfirm={handleConfirmDelete}
+        title="Delete"
+        message={`Delete this ${deleteTarget?.type}? ${deleteTarget?.type === 'folder' ? 'Items inside will be moved to parent.' : ''}`}
+        isOpen={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
         confirmLabel="Delete"
         danger
       />

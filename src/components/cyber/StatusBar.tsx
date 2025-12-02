@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { retro } from '@/styles/retro';
+import { cyber } from '@/styles/cyber';
 
 interface StatusSegment {
   content: ReactNode;
@@ -14,11 +14,11 @@ export function StatusBar({ segments }: StatusBarProps) {
   return (
     <div
       style={{
-        background: retro.windowBg,
-        borderTop: `2px solid ${retro.inset}`,
-        padding: '2px 4px',
+        background: cyber.white,
+        borderTop: cyber.border,
+        padding: '4px 8px',
         display: 'flex',
-        gap: 2,
+        gap: 8,
       }}
     >
       {segments.map((segment, i) => (
@@ -26,12 +26,13 @@ export function StatusBar({ segments }: StatusBarProps) {
           key={i}
           style={{
             flex: segment.flex || 'none',
-            padding: '1px 6px',
-            border: '1px solid',
-            borderColor: `${retro.inset} ${retro.outset} ${retro.outset} ${retro.inset}`,
-            fontSize: 10,
-            fontFamily: retro.font,
+            padding: '4px 8px',
+            border: cyber.borderLight,
+            fontSize: 11,
+            fontFamily: cyber.fontDisplay,
+            fontWeight: 700,
             whiteSpace: 'nowrap',
+            textTransform: 'uppercase',
           }}
         >
           {segment.content}

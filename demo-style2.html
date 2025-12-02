@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphex Protocol: MVP Specification</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <!-- Fonts: Space Mono (Retro Tech) & Inter (Readability) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Chosen Palette: "Neo-Brutalist Lab" 
+         Background: #F2F2F2 (Concrete)
+         Surface: #FFFFFF (Paper)
+         Primary: #000000 (Ink)
+         Accent A: #FF3E00 (Safety Orange)
+         Accent B: #0047FF (International Klein Blue)
+    -->
+
+    <!-- Application Structure Plan:
+         Designed as a "Technical Specification Console".
+         Layout: Fixed Sidebar (Navigation) + Scrollable Main Content.
+         Aesthetic: Raw, bordered, solid shadows, monospaced headers. High contrast.
+         
+         Sections:
+         1. SYSTEM STATUS (Dashboard): Quick overview of the "Problem vs Solution".
+         2. PROTOCOL LOGIC (Workflow): Interactive stepper showing the AI-Reading loop.
+         3. TECHNICAL SPECS (Backend/Dev): The core research requests (PDF, Algo, Security).
+         4. INTERFACE LAB (UX/UI): A "Component Kitchen" and Navigation Map for the MVP.
+         
+         Rational: This structure treats the product proposal as an engineering blueprint, 
+         aligning with the "developer-focused" research request while maintaining a unique "retro-functional" style.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. Information Density (Motivation) -> Goal: Compare -> Chart.js Bar -> Solid colors, no gradients, hard borders.
+         2. Knowledge Graph Simulation (Workflow) -> Goal: Relationships -> Plotly Network -> Simulates the core interaction loop.
+         3. MVP Complexity Matrix (Specs) -> Goal: Organize -> Plotly Scatter -> Impact vs Effort analysis.
+         4. Component Library (UX) -> Goal: Inform -> HTML/CSS Grid -> Live interactive UI elements to demonstrate the design system.
+         
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+
+    <style>
+        :root {
+            --bg-color: #F2F2F2;
+            --surface-color: #FFFFFF;
+            --ink-color: #000000;
+            --accent-orange: #FF3E00;
+            --accent-blue: #0047FF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--ink-color);
+        }
+
+        h1, h2, h3, h4, .mono {
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Neo-Brutalist Styles */
+        .retro-box {
+            background: var(--surface-color);
+            border: 2px solid var(--ink-color);
+            box-shadow: 4px 4px 0px var(--ink-color);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .retro-box:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 5px 5px 0px var(--ink-color);
+        }
+
+        .retro-btn {
+            background: var(--surface-color);
+            border: 2px solid var(--ink-color);
+            padding: 0.5rem 1rem;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px var(--ink-color);
+            transition: all 0.1s;
+        }
+
+        .retro-btn:active, .retro-btn.active {
+            background: var(--ink-color);
+            color: var(--surface-color);
+            box-shadow: 0px 0px 0px;
+            transform: translate(3px, 3px);
+        }
+
+        .retro-btn-accent {
+            background: var(--accent-orange);
+            color: white;
+            border: 2px solid var(--ink-color);
+        }
+
+        /* Chart Container Mandatory Styles */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+            background: white;
+            border: 2px solid black;
+            padding: 10px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border-left: 2px solid black;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: black;
+            border: 2px solid #e0e0e0;
+        }
+
+        /* Utility for Grid Lines */
+        .bg-grid {
+            background-image: 
+                linear-gradient(to right, #e5e5e5 1px, transparent 1px),
+                linear-gradient(to bottom, #e5e5e5 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .nav-item.active {
+            background-color: #000;
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-white border-r-2 border-black flex flex-col hidden md:flex z-20">
+        <div class="p-6 border-b-2 border-black bg-orange-500">
+            <h1 class="text-2xl font-bold tracking-tighter text-white">GRAPHEX<span class="text-xs align-top opacity-75">v0.1</span></h1>
+            <p class="text-xs font-mono mt-1 text-black font-bold">PROTOCOL_SPEC</p>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+            <button onclick="switchSection('dashboard')" class="nav-item w-full text-left p-3 font-mono font-bold border-2 border-transparent hover:border-black transition-all active" id="nav-dashboard">
+                01. SYSTEM STATUS
+            </button>
+            <button onclick="switchSection('workflow')" class="nav-item w-full text-left p-3 font-mono font-bold border-2 border-transparent hover:border-black transition-all" id="nav-workflow">
+                02. LOGIC LOOP
+            </button>
+            <button onclick="switchSection('tech')" class="nav-item w-full text-left p-3 font-mono font-bold border-2 border-transparent hover:border-black transition-all" id="nav-tech">
+                03. TECH SPECS
+            </button>
+            <button onclick="switchSection('ui-lab')" class="nav-item w-full text-left p-3 font-mono font-bold border-2 border-transparent hover:border-black transition-all" id="nav-ui-lab">
+                04. INTERFACE LAB
+            </button>
+        </nav>
+
+        <div class="p-4 border-t-2 border-black bg-gray-100">
+            <div class="font-mono text-xs">USER: ARCHITECT</div>
+            <div class="font-mono text-xs text-green-600 font-bold">● ONLINE</div>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <div class="md:hidden fixed top-0 w-full bg-orange-500 border-b-2 border-black z-50 p-4 flex justify-between items-center">
+        <h1 class="font-black text-white">GRAPHEX</h1>
+        <button onclick="toggleMobileMenu()" class="retro-btn text-xs">MENU</button>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-white z-40 hidden flex flex-col p-8 pt-20 space-y-4">
+        <button onclick="switchSection('dashboard'); toggleMobileMenu()" class="retro-btn w-full">01. SYSTEM STATUS</button>
+        <button onclick="switchSection('workflow'); toggleMobileMenu()" class="retro-btn w-full">02. LOGIC LOOP</button>
+        <button onclick="switchSection('tech'); toggleMobileMenu()" class="retro-btn w-full">03. TECH SPECS</button>
+        <button onclick="switchSection('ui-lab'); toggleMobileMenu()" class="retro-btn w-full">04. INTERFACE LAB</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto bg-grid relative pt-16 md:pt-0">
+        
+        <!-- Section: Dashboard (Motivation) -->
+        <section id="dashboard" class="p-6 md:p-12 max-w-6xl mx-auto animate-fade">
+            <header class="mb-12 border-b-2 border-black pb-6">
+                <span class="bg-black text-white px-2 py-1 font-mono text-xs font-bold">SECTION 01</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-2 uppercase">Motivation Matrix</h2>
+                <p class="mt-4 text-lg font-serif max-w-2xl leading-relaxed">
+                    Current information consumption is linear and static. 
+                    <span class="bg-yellow-200 px-1 border border-black">Graphex</span> proposes a dynamic, cyclical ingestion model. 
+                    We are shifting from "Reading" to "Structuring".
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Text Data -->
+                <div class="retro-box p-6 bg-white flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-mono text-xl font-bold border-b-2 border-black pb-2 mb-4">PROBLEM_DEF</h3>
+                        <ul class="space-y-4 font-mono text-sm">
+                            <li class="flex items-start">
+                                <span class="mr-2 text-red-600 font-bold">[!]</span>
+                                Static PDFs hide relationships between disjointed arguments.
+                            </li>
+                            <li class="flex items-start">
+                                <span class="mr-2 text-red-600 font-bold">[!]</span>
+                                Linear reading retention drops significantly after 45 minutes.
+                            </li>
+                            <li class="flex items-start">
+                                <span class="mr-2 text-red-600 font-bold">[!]</span>
+                                No mechanism to "Verify" understanding in real-time.
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mt-8 pt-4 border-t-2 border-dashed border-black">
+                        <div class="text-xs uppercase text-gray-500 mb-1">Target Metric</div>
+                        <div class="text-3xl font-bold text-blue-600">3x Efficiency</div>
+                        <div class="text-sm font-serif">In cross-referencing concepts.</div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="retro-box p-6 bg-white">
+                    <h3 class="font-mono text-xl font-bold mb-4">RETENTION_ANALYSIS</h3>
+                    <div class="chart-container" id="chart-retention">
+                        <canvas id="retentionCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Workflow (Solution) -->
+        <section id="workflow" class="hidden p-6 md:p-12 max-w-6xl mx-auto animate-fade">
+            <header class="mb-12 border-b-2 border-black pb-6">
+                <span class="bg-black text-white px-2 py-1 font-mono text-xs font-bold">SECTION 02</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-2 uppercase">Logic Loop</h2>
+                <p class="mt-4 text-lg font-serif max-w-2xl leading-relaxed">
+                    The user experience is defined by a 4-step recursive cycle. 
+                    Ingest data, Explore the graph, Annotate findings, and Verify knowledge.
+                </p>
+            </header>
+
+            <!-- Interactive Stepper -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-4 space-y-4">
+                    <button onclick="setWorkflowStep(1)" id="step-btn-1" class="retro-btn w-full text-left active">
+                        <span class="font-mono text-xs opacity-50 block">STEP 01</span>
+                        INGEST & GENERATE
+                    </button>
+                    <button onclick="setWorkflowStep(2)" id="step-btn-2" class="retro-btn w-full text-left">
+                        <span class="font-mono text-xs opacity-50 block">STEP 02</span>
+                        EXPLORE & READ
+                    </button>
+                    <button onclick="setWorkflowStep(3)" id="step-btn-3" class="retro-btn w-full text-left">
+                        <span class="font-mono text-xs opacity-50 block">STEP 03</span>
+                        ANNOTATE & MODIFY
+                    </button>
+                    <button onclick="setWorkflowStep(4)" id="step-btn-4" class="retro-btn w-full text-left">
+                        <span class="font-mono text-xs opacity-50 block">STEP 04</span>
+                        CHALLENGE MODE
+                    </button>
+
+                    <div class="retro-box p-4 bg-yellow-100 mt-6">
+                        <h4 class="font-mono font-bold text-sm border-b border-black pb-1 mb-2">CURRENT_STATE</h4>
+                        <p id="workflow-desc" class="font-serif text-sm">
+                            System parses PDF, detects layout, and generates initial Log(N) summary nodes.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-8">
+                    <div class="retro-box p-2 bg-white h-full min-h-[400px]">
+                        <!-- Plotly Graph Container -->
+                        <div id="workflow-graph" class="w-full h-full"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Tech Specs (Research) -->
+        <section id="tech" class="hidden p-6 md:p-12 max-w-6xl mx-auto animate-fade">
+            <header class="mb-12 border-b-2 border-black pb-6">
+                <span class="bg-black text-white px-2 py-1 font-mono text-xs font-bold">SECTION 03</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-2 uppercase">Technical Specifications</h2>
+                <p class="mt-4 text-lg font-serif max-w-2xl leading-relaxed">
+                    Architecture decisions for the MVP. Focusing on data integrity, scalable algorithms, and security boundaries.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                
+                <!-- Spec Card 1 -->
+                <div class="retro-box bg-white p-6">
+                    <div class="flex justify-between items-center mb-4 border-b-2 border-black pb-2">
+                        <h3 class="font-mono font-bold text-lg">01. PDF_PARSING</h3>
+                        <span class="bg-orange-500 text-white text-xs px-2 py-1 font-mono">CRITICAL</span>
+                    </div>
+                    <p class="text-sm font-serif mb-4">
+                        Standard OCR fails on structural relationships. We require layout-aware parsing to preserve headers and tables.
+                    </p>
+                    <div class="bg-gray-100 p-3 border border-black mb-4 font-mono text-xs">
+                        > TARGET: Marker (VikParuchuri)<br>
+                        > ALT: Mathpix API (Costly)<br>
+                        > OUT: Plain Tesseract
+                    </div>
+                    <div class="w-full bg-gray-200 h-2 border border-black mt-2">
+                        <div class="bg-black h-full" style="width: 92%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs font-mono mt-1">
+                        <span>ACCURACY</span>
+                        <span>92%</span>
+                    </div>
+                </div>
+
+                <!-- Spec Card 2 -->
+                <div class="retro-box bg-white p-6">
+                    <div class="flex justify-between items-center mb-4 border-b-2 border-black pb-2">
+                        <h3 class="font-mono font-bold text-lg">02. NODE_ALGO</h3>
+                        <span class="bg-blue-600 text-white text-xs px-2 py-1 font-mono">OPTIMIZED</span>
+                    </div>
+                    <p class="text-sm font-serif mb-4">
+                        Avoiding full-text context dumping. Implementing hierarchical summarization with embeddings.
+                    </p>
+                    <ul class="list-none space-y-2 text-sm font-mono">
+                        <li class="flex items-center"><span class="w-2 h-2 bg-black mr-2"></span>Step 1: Chunk by Header</li>
+                        <li class="flex items-center"><span class="w-2 h-2 bg-black mr-2"></span>Step 2: Recursive Summary</li>
+                        <li class="flex items-center"><span class="w-2 h-2 bg-black mr-2"></span>Step 3: Lazy Load Children</li>
+                    </ul>
+                </div>
+
+                <!-- Spec Card 3 -->
+                <div class="retro-box bg-white p-6">
+                    <div class="flex justify-between items-center mb-4 border-b-2 border-black pb-2">
+                        <h3 class="font-mono font-bold text-lg">03. SECURITY</h3>
+                        <span class="bg-black text-white text-xs px-2 py-1 font-mono">MANDATORY</span>
+                    </div>
+                    <p class="text-sm font-serif mb-4">
+                        Zero-Trust architecture. Isolation of user knowledge bases.
+                    </p>
+                    <div class="space-y-3">
+                        <div class="border border-black p-2 bg-red-50">
+                            <strong class="font-mono text-xs block text-red-600">THREAT: DATA LEAK</strong>
+                            <span class="text-xs">Mitigation: Row Level Security (RLS) on Postgres.</span>
+                        </div>
+                        <div class="border border-black p-2 bg-green-50">
+                            <strong class="font-mono text-xs block text-green-600">ACCESS CONTROL</strong>
+                            <span class="text-xs">Method: Presigned URLs (Time-limited) for PDF assets.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spec Card 4 -->
+                <div class="retro-box bg-white p-6">
+                    <div class="flex justify-between items-center mb-4 border-b-2 border-black pb-2">
+                        <h3 class="font-mono font-bold text-lg">04. FRONTEND</h3>
+                        <span class="bg-gray-500 text-white text-xs px-2 py-1 font-mono">REACT</span>
+                    </div>
+                    <p class="text-sm font-serif mb-4">
+                        No Mermaid generation on backend. Backend returns JSON (Nodes/Edges). Frontend renders interactive canvas.
+                    </p>
+                    <div class="grid grid-cols-2 gap-2 text-center text-xs font-mono font-bold">
+                        <div class="border border-black p-2 bg-gray-100">ReactFlow</div>
+                        <div class="border border-black p-2 bg-gray-100">Cytoscape</div>
+                        <div class="border border-black p-2 bg-gray-100">D3.js</div>
+                        <div class="border border-black p-2 bg-black text-white">SELECTED</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Priority Matrix -->
+            <div class="mt-8 retro-box bg-white p-6">
+                <h3 class="font-mono font-bold text-xl mb-4">MVP_PRIORITY_MATRIX</h3>
+                <div class="chart-container" id="chart-priority">
+                    <div id="priorityPlot" class="w-full h-full"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: UI Lab (UX Research) -->
+        <section id="ui-lab" class="hidden p-6 md:p-12 max-w-6xl mx-auto animate-fade">
+            <header class="mb-12 border-b-2 border-black pb-6">
+                <span class="bg-black text-white px-2 py-1 font-mono text-xs font-bold">SECTION 04</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-2 uppercase">Interface Laboratory</h2>
+                <p class="mt-4 text-lg font-serif max-w-2xl leading-relaxed">
+                    Defining the "Retro-Functional" design language. Primitive aesthetics, complex interactions.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                
+                <!-- Component Platte -->
+                <div class="space-y-8">
+                    <h3 class="font-mono text-xl font-bold border-b-2 border-black inline-block mb-4">COMPONENT_PALETTE</h3>
+                    
+                    <!-- Buttons -->
+                    <div class="retro-box p-6 bg-white space-y-4">
+                        <h4 class="font-mono text-sm text-gray-500">INTERACTIVE_ELEMENTS</h4>
+                        <div class="flex flex-wrap gap-4">
+                            <button class="retro-btn">PRIMARY_ACTION</button>
+                            <button class="retro-btn retro-btn-accent">DANGER_ZONE</button>
+                            <button class="retro-btn opacity-50 cursor-not-allowed">DISABLED</button>
+                        </div>
+                    </div>
+
+                    <!-- Nodes -->
+                    <div class="retro-box p-6 bg-white space-y-4">
+                        <h4 class="font-mono text-sm text-gray-500">KNOWLEDGE_NODES</h4>
+                        <div class="flex gap-4 items-center">
+                            <div class="w-12 h-12 rounded-full border-2 border-black bg-white flex items-center justify-center font-bold shadow-[2px_2px_0px_black]">A</div>
+                            <div class="h-0.5 w-8 bg-black"></div>
+                            <div class="w-12 h-12 rounded-full border-2 border-black bg-orange-500 text-white flex items-center justify-center font-bold shadow-[2px_2px_0px_black]">B</div>
+                            <div class="h-0.5 w-8 bg-black border-t border-dashed border-gray-500"></div>
+                            <div class="w-12 h-12 rounded-full border-2 border-dashed border-black bg-gray-100 flex items-center justify-center font-bold text-gray-400">?</div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts -->
+                    <div class="retro-box p-6 bg-white space-y-4">
+                        <h4 class="font-mono text-sm text-gray-500">SYSTEM_ALERTS</h4>
+                        <div class="border-2 border-black bg-blue-50 p-3 font-mono text-sm flex justify-between">
+                            <span>> AI_PROCESSING...</span>
+                            <span class="animate-pulse">_</span>
+                        </div>
+                        <div class="border-2 border-black bg-red-50 p-3 font-mono text-sm text-red-600">
+                            <span>> ERROR: CONNECTION_LOST</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Logic Tree -->
+                <div class="retro-box p-6 bg-white h-full">
+                    <h3 class="font-mono text-xl font-bold border-b-2 border-black inline-block mb-6">NAVIGATION_FLOW</h3>
+                    
+                    <div class="relative pl-4 border-l-2 border-dashed border-black space-y-8 font-mono text-sm">
+                        <!-- Level 1 -->
+                        <div class="relative">
+                            <div class="absolute -left-[21px] top-3 w-4 h-0.5 bg-black"></div>
+                            <div class="border-2 border-black bg-gray-100 p-2 inline-block font-bold">HOME / DASHBOARD</div>
+                            <div class="ml-8 mt-4 space-y-4 border-l-2 border-black pl-4 pb-2">
+                                <!-- Level 2 -->
+                                <div class="relative">
+                                    <div class="absolute -left-[18px] top-3 w-4 h-0.5 bg-black"></div>
+                                    <div class="border-2 border-black bg-white p-2 inline-block hover:bg-orange-100 cursor-pointer">UPLOAD_DOCUMENT</div>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute -left-[18px] top-3 w-4 h-0.5 bg-black"></div>
+                                    <div class="border-2 border-black bg-white p-2 inline-block hover:bg-orange-100 cursor-pointer">LIBRARY_VIEW</div>
+                                    
+                                    <!-- Level 3 -->
+                                    <div class="ml-8 mt-4 space-y-4 border-l-2 border-dashed border-black pl-4">
+                                        <div class="relative">
+                                            <div class="absolute -left-[18px] top-3 w-4 h-0.5 bg-black"></div>
+                                            <div class="border-2 border-black bg-blue-50 p-2 inline-block">GRAPH_CANVAS (Editor)</div>
+                                        </div>
+                                        <div class="relative">
+                                            <div class="absolute -left-[18px] top-3 w-4 h-0.5 bg-black"></div>
+                                            <div class="border-2 border-black bg-blue-50 p-2 inline-block">READING_MODE (Split)</div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute -left-[18px] top-3 w-4 h-0.5 bg-black"></div>
+                                    <div class="border-2 border-black bg-white p-2 inline-block hover:bg-orange-100 cursor-pointer">ACCOUNT_SETTINGS</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Implementation -->
+    <script>
+        // --- Navigation Logic ---
+        function switchSection(sectionId) {
+            // Hide all sections
+            const sections = ['dashboard', 'workflow', 'tech', 'ui-lab'];
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
+                
+                // Update Nav State
+                const btn = document.getElementById('nav-' + id);
+                if(btn) btn.classList.remove('active');
+            });
+
+            // Show selected
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Activate Nav
+            const activeBtn = document.getElementById('nav-' + sectionId);
+            if(activeBtn) activeBtn.classList.add('active');
+
+            // Resize charts if needed
+            if(sectionId === 'dashboard') {
+                const chartInstance = Chart.getChart("retentionCanvas");
+                if (chartInstance) chartInstance.resize();
+            }
+            if(sectionId === 'tech') {
+                Plotly.relayout('priorityPlot', {autosize: true});
+            }
+            if(sectionId === 'workflow') {
+                Plotly.relayout('workflow-graph', {autosize: true});
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- Data & Charts ---
+
+        // 1. Dashboard: Retention Chart (Chart.js)
+        // Style: Brutalist, solid colors, sharp edges.
+        function initRetentionChart() {
+            const ctx = document.getElementById('retentionCanvas').getContext('2d');
+            
+            Chart.defaults.font.family = "'Space Mono', monospace";
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Linear Reading', 'Graphex Protocol'],
+                    datasets: [{
+                        label: 'Retention % (24h)',
+                        data: [45, 88],
+                        backgroundColor: [
+                            '#e5e5e5', // Grey
+                            '#FF3E00'  // Orange
+                        ],
+                        borderColor: '#000000',
+                        borderWidth: 2,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#000',
+                            titleFont: { family: 'Space Mono' },
+                            bodyFont: { family: 'Space Mono' },
+                            cornerRadius: 0,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: '#e5e5e5' },
+                            ticks: { color: '#000' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#000', font: { weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Tech: Priority Matrix (Plotly.js)
+        // Style: Grid paper look, stark markers.
+        function initPriorityPlot() {
+            const trace1 = {
+                x: [3, 8, 4, 9, 7], // Effort
+                y: [9, 7, 5, 4, 8], // Impact
+                mode: 'markers+text',
+                type: 'scatter',
+                text: ['Parsing', 'Multi-Merge', 'Auth', 'Notes', 'Quiz'],
+                textposition: 'top center',
+                textfont: { family: 'Space Mono', size: 12, color: 'black' },
+                marker: { 
+                    size: 18, 
+                    color: ['#000', '#FF3E00', '#fff', '#fff', '#000'],
+                    line: { width: 2, color: '#000' }
+                }
+            };
+
+            const layout = {
+                title: { text: 'MVP: IMPACT / EFFORT', font: { family: 'Space Mono', size: 16 } },
+                xaxis: { title: 'EFFORT', range: [0, 10], showgrid: true, gridcolor: '#e5e5e5' },
+                yaxis: { title: 'IMPACT', range: [0, 10], showgrid: true, gridcolor: '#e5e5e5' },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                margin: { t: 40, b: 40, l: 40, r: 40 },
+                hovermode: 'closest'
+            };
+
+            Plotly.newPlot('priorityPlot', [trace1], layout, {responsive: true, displayModeBar: false});
+        }
+
+        // 3. Workflow: Interactive Graph (Plotly.js)
+        // Logic to update graph based on step
+        let currentWorkflowStep = 1;
+
+        function setWorkflowStep(step) {
+            currentWorkflowStep = step;
+            
+            // UI Updates
+            document.querySelectorAll('[id^="step-btn-"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('step-btn-' + step).classList.add('active');
+
+            // Description Updates
+            const descs = [
+                "",
+                "SYSTEM: Layout-Aware Parsing initiated. Identifying 3 main topic clusters via Embeddings.",
+                "USER: Navigating Cluster A. Reading Source PDF snippet in split-view.",
+                "USER: Adding 'Contradiction' edge between Cluster A and B. AI updates internal weights.",
+                "SYSTEM: Quiz generated. 'Explain the link between A & B'. Verifying user input."
+            ];
+            document.getElementById('workflow-desc').innerText = descs[step];
+
+            updateNetworkGraph(step);
+        }
+
+        function updateNetworkGraph(step) {
+            // Define nodes and edges based on step logic
+            let x = [], y = [], color = [], symbol = [], size = [], text = [];
+            let edgeX = [], edgeY = [], edgeColor = '#000';
+
+            // Base Graph
+            x = [1, 2, 3]; y = [1, 2, 1];
+            text = ['Intro', 'Core', 'Result'];
+            size = [30, 40, 30];
+            symbol = ['circle', 'circle', 'circle'];
+            color = ['#fff', '#000', '#fff']; // Default B&W
+
+            // Edges (Base)
+            edgeX = [1, 2, 2, 3]; edgeY = [1, 2, 2, 1];
+
+            if (step >= 2) {
+                // Explore: Highlight Node 2
+                color[1] = '#FF3E00'; // Orange focus
+                text[1] = 'READING...';
+            }
+
+            if (step >= 3) {
+                // Annotate: Add new node
+                x.push(2); y.push(0.5);
+                text.push('NOTE');
+                color.push('#0047FF'); // Blue note
+                size.push(20);
+                symbol.push('square');
+
+                // Edge to Note
+                edgeX.push(2, 2); edgeY.push(2, 0.5);
+            }
+
+            if (step === 4) {
+                // Challenge: Dim others, highlight path 1-3
+                color = ['#e5e5e5', '#e5e5e5', '#e5e5e5', '#e5e5e5'];
+                edgeColor = '#e5e5e5';
+                
+                // Add Question Mark Node
+                x.push(2); y.push(1.5);
+                text.push('???');
+                color.push('#FF3E00');
+                size.push(50);
+                symbol.push('diamond');
+            }
+
+            const traceNodes = {
+                x: x, y: y,
+                mode: 'markers+text',
+                type: 'scatter',
+                text: text,
+                textposition: 'bottom center',
+                textfont: { family: 'Space Mono', weight: 'bold' },
+                marker: { 
+                    size: size, 
+                    color: color, 
+                    symbol: symbol,
+                    line: { width: 2, color: '#000' } 
+                },
+                hoverinfo: 'none'
+            };
+
+            const traceEdges = {
+                x: edgeX, y: edgeY,
+                mode: 'lines',
+                line: { color: edgeColor, width: 2 },
+                hoverinfo: 'none'
+            };
+
+            const layout = {
+                xaxis: { range: [0, 4], showgrid: false, zeroline: false, showticklabels: false },
+                yaxis: { range: [0, 3], showgrid: false, zeroline: false, showticklabels: false },
+                showlegend: false,
+                margin: { t: 10, b: 10, l: 10, r: 10 },
+                paper_bgcolor: '#FFF',
+                plot_bgcolor: '#FFF',
+                dragmode: false
+            };
+
+            Plotly.react('workflow-graph', [traceEdges, traceNodes], layout, {displayModeBar: false});
+        }
+
+        // Initialize
+        window.onload = function() {
+            initRetentionChart();
+            initPriorityPlot();
+            updateNetworkGraph(1);
+        };
+
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { retro } from '@/styles/retro';
+import { cyber } from '@/styles/cyber';
 
 interface MenuItem {
   label: string;
@@ -56,13 +56,12 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
         position: 'fixed',
         left: x,
         top: y,
-        background: retro.windowBg,
-        border: '2px solid',
-        borderColor: `${retro.outset} ${retro.inset} ${retro.inset} ${retro.outset}`,
-        boxShadow: '2px 2px 0 rgba(0,0,0,0.3)',
-        minWidth: 150,
+        background: cyber.white,
+        border: cyber.border,
+        boxShadow: cyber.shadow,
+        minWidth: 160,
         zIndex: 1001,
-        fontFamily: retro.font,
+        fontFamily: cyber.fontDisplay,
         fontSize: 12,
       }}
     >
@@ -71,8 +70,8 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
           <div
             key={i}
             style={{
-              height: 1,
-              background: retro.darkGray,
+              height: 2,
+              background: cyber.black,
               margin: '4px 0',
             }}
           />
@@ -86,20 +85,24 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
               }
             }}
             style={{
-              padding: '6px 12px',
+              padding: '8px 14px',
               cursor: item.disabled ? 'default' : 'pointer',
-              color: item.disabled ? retro.darkGray : retro.black,
+              color: item.disabled ? cyber.darkGray : cyber.black,
               background: 'transparent',
+              textTransform: 'uppercase',
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              transition: 'all 0.1s ease',
             }}
             onMouseEnter={(e) => {
               if (!item.disabled) {
-                e.currentTarget.style.background = retro.blue;
-                e.currentTarget.style.color = retro.white;
+                e.currentTarget.style.background = cyber.black;
+                e.currentTarget.style.color = cyber.white;
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = item.disabled ? retro.darkGray : retro.black;
+              e.currentTarget.style.color = item.disabled ? cyber.darkGray : cyber.black;
             }}
           >
             {item.label}
