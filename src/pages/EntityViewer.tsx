@@ -1,116 +1,95 @@
-import { useParams } from 'react-router-dom';
-import { retro } from '@/styles/retro';
-import { Window, TitleBar, StatusBar, SectionHeader, Inset } from '@/components/retro';
+import { useParams, Link } from 'react-router-dom';
+import { Header } from '@/components/layout';
+
+const ArrowLeftIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+  </svg>
+);
 
 export default function EntityViewer() {
   const { id } = useParams<{ id: string }>();
 
   return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        background: retro.desktop,
-        fontFamily: retro.font,
-        padding: 8,
-      }}
-    >
-      <Window style={{ flex: 1 }}>
-        <TitleBar title={`GRAPHEX.EXE — Entity: ${id}`} />
+    <div className="min-h-screen flex flex-col paper-bg">
+      <Header />
 
+      <main className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div
-          style={{
-            padding: '4px 6px',
-            borderBottom: `1px solid ${retro.inset}`,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            fontSize: 11,
-          }}
-        >
-          <span style={{ color: retro.darkGray }}>
-            Active: <strong style={{ color: retro.black }}>—</strong>
-          </span>
-          <span style={{ color: retro.darkGray }}>|</span>
-          <span style={{ color: retro.darkGray }}>Sync: —</span>
+        <div className="border-b border-sand-200 bg-sand-50/50">
+          <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link
+                to="/"
+                className="flex items-center gap-2 text-sm text-sand-500 hover:text-sand-700 transition-colors"
+              >
+                <ArrowLeftIcon className="w-4 h-4" />
+                Back to Library
+              </Link>
+              <span className="text-sand-300">|</span>
+              <h1 className="text-lg font-medium text-sand-800">
+                Entity: {id}
+              </h1>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-sand-500">
+              <span>Sync: <span className="text-sand-700">Active</span></span>
+              <span className="text-sand-300">|</span>
+              <span>0 nodes</span>
+            </div>
+          </div>
         </div>
 
         {/* Split View */}
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        <div className="flex-1 flex overflow-hidden">
           {/* Graph Panel */}
-          <div
-            style={{
-              width: '45%',
-              borderRight: `2px solid ${retro.inset}`,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <SectionHeader title="KNOWLEDGE GRAPH" />
-            <Inset style={{ flex: 1, margin: 4, position: 'relative' }}>
+          <div className="w-[45%] border-r border-sand-200 flex flex-col">
+            <div className="px-4 py-2 border-b border-sand-200 bg-sand-50">
+              <h2 className="text-xs font-semibold text-sand-600 uppercase tracking-widest">
+                Knowledge Graph
+              </h2>
+            </div>
+            <div className="flex-1 relative bg-sand-50/30">
               {/* Grid background */}
               <div
+                className="absolute inset-0"
                 style={{
-                  position: 'absolute',
-                  inset: 0,
                   backgroundImage: `
-                    linear-gradient(${retro.gray}30 1px, transparent 1px),
-                    linear-gradient(90deg, ${retro.gray}30 1px, transparent 1px)
+                    linear-gradient(#E6D9C630 1px, transparent 1px),
+                    linear-gradient(90deg, #E6D9C630 1px, transparent 1px)
                   `,
                   backgroundSize: '24px 24px',
                 }}
               />
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: retro.darkGray,
-                  fontSize: 12,
-                }}
-              >
+              <div className="absolute inset-0 flex items-center justify-center text-sand-400 text-sm">
                 Graph canvas will render here
               </div>
-            </Inset>
+            </div>
           </div>
 
           {/* Source Panel */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <SectionHeader title="PDF VIEWER" />
-            <div
-              style={{
-                flex: 1,
-                overflow: 'auto',
-                background: retro.white,
-                padding: '20px 32px',
-              }}
-            >
-              <div
-                style={{
-                  maxWidth: 600,
-                  margin: '0 auto',
-                  color: retro.darkGray,
-                  fontSize: 12,
-                }}
-              >
+          <div className="flex-1 flex flex-col">
+            <div className="px-4 py-2 border-b border-sand-200 bg-sand-50">
+              <h2 className="text-xs font-semibold text-sand-600 uppercase tracking-widest">
+                Source Document
+              </h2>
+            </div>
+            <div className="flex-1 overflow-auto bg-white p-8">
+              <div className="max-w-2xl mx-auto text-sand-400 text-sm">
                 Source content will render here
               </div>
             </div>
           </div>
         </div>
 
-        <StatusBar
-          segments={[
-            { content: 'Two-way sync active', flex: 1 },
-            { content: 'Node: —' },
-            { content: '0 nodes' },
-          ]}
-        />
-      </Window>
+        {/* Status Bar */}
+        <div className="border-t border-sand-200 bg-sand-50 px-6 py-2 text-xs text-sand-500">
+          <div className="max-w-7xl mx-auto flex items-center gap-6">
+            <span>Two-way sync active</span>
+            <span className="text-sand-300">|</span>
+            <span>Node: —</span>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
