@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphex | Knowledge Library</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // Warm Sand Palette
+                        sand: {
+                            50: '#FDFBF7',   // Lightest - page background
+                            100: '#FAF6EF',  // Card background
+                            200: '#F3EBE0',  // Borders, dividers
+                            300: '#E6D9C6',  // Hover states
+                            400: '#C9B89A',  // Muted text
+                            500: '#A89274',  // Secondary text
+                            600: '#8B7355',  // Primary text muted
+                            700: '#6B5A45',  // Primary text
+                            800: '#4A3F32',  // Headings
+                            900: '#2D261E',  // Strongest text
+                        },
+                        // Accent - Terracotta
+                        terra: {
+                            400: '#E07B5A',
+                            500: '#C96442',
+                            600: '#B54D2E',
+                            700: '#8B3A22',
+                        },
+                        // Secondary Accent - Deep Teal (kept for contrast)
+                        accent: {
+                            400: '#2D9B8A',
+                            500: '#0F766E',
+                            600: '#0C5D58',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Lora', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7;
+            color: #4A3F32;
+        }
+
+        .font-serif { font-family: 'Lora', serif; }
+
+        /* Paper Textures */
+        .paper-texture {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-blend-mode: soft-light;
+            background-size: 150px;
+        }
+
+        .paper-bg {
+            background: 
+                linear-gradient(180deg, rgba(253,251,247,0.97) 0%, rgba(250,246,239,0.98) 100%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-size: auto, 200px;
+        }
+
+        /* Paper Card - like a sheet of paper */
+        .paper-card {
+            background: 
+                linear-gradient(180deg, #FFFEFA 0%, #FAF6EF 100%);
+            border: 1px solid #E6D9C6;
+            border-radius: 3px;
+            box-shadow: 
+                0 1px 2px rgba(107, 90, 69, 0.06),
+                0 2px 4px rgba(107, 90, 69, 0.04),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            position: relative;
+        }
+
+        .paper-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            border-radius: 3px;
+        }
+
+        .paper-card:hover {
+            box-shadow: 
+                0 2px 4px rgba(107, 90, 69, 0.08),
+                0 4px 12px rgba(107, 90, 69, 0.06),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            transform: translateY(-1px);
+        }
+
+        /* Stacked Paper Effect */
+        .paper-stack {
+            position: relative;
+        }
+
+        .paper-stack::before,
+        .paper-stack::after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            right: 4px;
+            height: 100%;
+            background: #F3EBE0;
+            border: 1px solid #E6D9C6;
+            border-radius: 3px;
+            z-index: -1;
+        }
+
+        .paper-stack::before {
+            bottom: -4px;
+            transform: rotate(0.5deg);
+        }
+
+        .paper-stack::after {
+            bottom: -8px;
+            left: 8px;
+            right: 8px;
+            transform: rotate(-0.3deg);
+            background: #EDE4D6;
+        }
+
+        /* Folder styling - like paper folders */
+        .folder-item {
+            padding: 10px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid transparent;
+        }
+
+        .folder-item:hover {
+            background: #FAF6EF;
+            border-color: #E6D9C6;
+        }
+
+        .folder-item.active {
+            background: linear-gradient(135deg, #FDF8F3 0%, #F9F0E5 100%);
+            border-color: #C96442;
+            box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
+        }
+
+        .folder-item.active .folder-icon {
+            color: #C96442;
+        }
+
+        /* Entity Row */
+        .entity-row {
+            display: grid;
+            grid-template-columns: 1fr 80px 100px 40px;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #F3EBE0;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .entity-row:hover {
+            background: linear-gradient(90deg, #FDFBF7 0%, #FAF6EF 100%);
+        }
+
+        .entity-row:last-child {
+            border-bottom: none;
+        }
+
+        /* Tag - paper label style */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            background: linear-gradient(180deg, #FAF6EF 0%, #F3EBE0 100%);
+            border: 1px solid #E6D9C6;
+            border-radius: 3px;
+            font-size: 11px;
+            color: #6B5A45;
+            font-weight: 500;
+        }
+
+        /* Search */
+        .search-input {
+            background: #FFFEFA;
+            border: 1px solid #E6D9C6;
+            border-radius: 6px;
+            padding: 10px 14px 10px 40px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-shadow: inset 0 1px 2px rgba(107, 90, 69, 0.04);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #C96442;
+            box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1), inset 0 1px 2px rgba(107, 90, 69, 0.04);
+        }
+
+        .search-input::placeholder {
+            color: #A89274;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(180deg, #C96442 0%, #B54D2E 100%);
+            color: white;
+            border: 1px solid #8B3A22;
+            box-shadow: 0 1px 2px rgba(139, 58, 34, 0.2), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(180deg, #D4724F 0%, #C96442 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, #FFFEFA 0%, #FAF6EF 100%);
+            color: #6B5A45;
+            border: 1px solid #E6D9C6;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(180deg, #FAF6EF 0%, #F3EBE0 100%);
+            border-color: #C9B89A;
+        }
+
+        /* Header - like header paper strip */
+        .header-strip {
+            background: 
+                linear-gradient(180deg, #FFFEFA 0%, #FAF6EF 100%);
+            border-bottom: 1px solid #E6D9C6;
+            box-shadow: 0 1px 3px rgba(107, 90, 69, 0.05);
+        }
+
+        /* Stat cards */
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            line-height: 1;
+            color: #2D261E;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #8B7355;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 6px;
+        }
+
+        /* Progress Ring */
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        /* Divider - torn paper feel */
+        .divider-torn {
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                #E6D9C6 5%, 
+                #E6D9C6 15%,
+                transparent 15.5%,
+                transparent 20%,
+                #E6D9C6 20.5%,
+                #E6D9C6 45%,
+                transparent 45.5%,
+                transparent 50%,
+                #E6D9C6 50.5%,
+                #E6D9C6 80%,
+                transparent 80.5%,
+                transparent 85%,
+                #E6D9C6 85.5%,
+                #E6D9C6 95%,
+                transparent 100%
+            );
+            opacity: 0.6;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F3EBE0;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #C9B89A;
+            border-radius: 4px;
+            border: 2px solid #F3EBE0;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #A89274;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Notebook lines (optional decorative) */
+        .notebook-lines {
+            background-image: repeating-linear-gradient(
+                transparent,
+                transparent 27px,
+                #E6D9C6 28px
+            );
+            background-size: 100% 28px;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col paper-bg">
+
+    <!-- Header -->
+    <header class="header-strip sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-terra-500 to-terra-600 text-white flex items-center justify-center rounded-md shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <span class="text-lg font-semibold text-sand-800">Graphex</span>
+            </div>
+
+            <!-- Nav -->
+            <nav class="flex items-center gap-1">
+                <button class="px-4 py-2 text-sm font-medium text-terra-600 bg-terra-500/10 rounded-md border border-terra-500/20">Library</button>
+                <button class="px-4 py-2 text-sm font-medium text-sand-600 hover:text-sand-800 hover:bg-sand-200/50 rounded-md transition-colors">Explore</button>
+                <button class="px-4 py-2 text-sm font-medium text-sand-600 hover:text-sand-800 hover:bg-sand-200/50 rounded-md transition-colors">Settings</button>
+            </nav>
+
+            <!-- User -->
+            <div class="flex items-center gap-4">
+                <button class="text-sand-400 hover:text-sand-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sand-300 to-sand-400 flex items-center justify-center text-sand-700 text-sm font-medium border border-sand-300">
+                    JD
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="flex-1 max-w-7xl mx-auto px-6 py-8 w-full">
+        
+        <!-- Page Header -->
+        <div class="flex items-end justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-serif font-semibold text-sand-900 mb-1">Knowledge Library</h1>
+                <p class="text-sand-500 text-sm">Organize and explore your knowledge entities</p>
+            </div>
+            <button onclick="openUploadModal()" class="btn-primary inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                New Entity
+            </button>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="paper-card p-5 fade-in transition-all duration-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Entities</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-terra-500/10 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-terra-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-card p-5 fade-in transition-all duration-200" style="animation-delay: 0.05s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="stat-value">156</div>
+                        <div class="stat-label">Total Nodes</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-accent-500/10 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-card p-5 fade-in transition-all duration-200" style="animation-delay: 0.1s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="stat-value">68%</div>
+                        <div class="stat-label">Explored</div>
+                    </div>
+                    <svg class="progress-ring w-11 h-11" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="15" fill="none" stroke="#E6D9C6" stroke-width="3"/>
+                        <circle cx="18" cy="18" r="15" fill="none" stroke="#C96442" stroke-width="3" 
+                                stroke-dasharray="94.2" stroke-dashoffset="30" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="paper-card p-5 fade-in transition-all duration-200" style="animation-delay: 0.15s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="stat-value flex items-center gap-1">
+                            7
+                            <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-12 gap-6">
+            
+            <!-- Sidebar: Folders -->
+            <div class="col-span-3">
+                <div class="paper-card paper-stack p-4 sticky top-24">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-sand-200">
+                        <h3 class="text-xs font-semibold text-sand-600 uppercase tracking-widest">Collections</h3>
+                        <button class="text-sand-400 hover:text-terra-500 transition-colors" title="New Folder">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="folder-item active" onclick="selectFolder(this, 'all')">
+                            <svg class="w-4 h-4 folder-icon text-sand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                            <span class="text-sm font-medium">All Entities</span>
+                            <span class="ml-auto text-xs text-sand-400 bg-sand-200/50 px-1.5 py-0.5 rounded">12</span>
+                        </div>
+
+                        <div class="folder-item" onclick="selectFolder(this, 'research')">
+                            <svg class="w-4 h-4 folder-icon text-sand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                            </svg>
+                            <span class="text-sm">Research</span>
+                            <span class="ml-auto text-xs text-sand-400">5</span>
+                        </div>
+
+                        <div class="folder-item pl-9" onclick="selectFolder(this, 'ml')">
+                            <svg class="w-3.5 h-3.5 folder-icon text-sand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                            </svg>
+                            <span class="text-sm">ML Papers</span>
+                            <span class="ml-auto text-xs text-sand-400">3</span>
+                        </div>
+
+                        <div class="folder-item pl-9" onclick="selectFolder(this, 'thesis')">
+                            <svg class="w-3.5 h-3.5 folder-icon text-sand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                            </svg>
+                            <span class="text-sm">Thesis</span>
+                            <span class="ml-auto text-xs text-sand-400">2</span>
+                        </div>
+
+                        <div class="folder-item" onclick="selectFolder(this, 'work')">
+                            <svg class="w-4 h-4 folder-icon text-sand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                            </svg>
+                            <span class="text-sm">Work</span>
+                            <span class="ml-auto text-xs text-sand-400">4</span>
+                        </div>
+
+                        <div class="folder-item" onclick="selectFolder(this, 'archive')">
+                            <svg class="w-4 h-4 folder-icon text-sand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                            </svg>
+                            <span class="text-sm">Archive</span>
+                            <span class="ml-auto text-xs text-sand-400">3</span>
+                        </div>
+                    </div>
+
+                    <!-- Decorative torn edge -->
+                    <div class="divider-torn my-5"></div>
+
+                    <!-- Quick Actions -->
+                    <div>
+                        <h4 class="text-xs font-semibold text-sand-400 uppercase tracking-widest mb-3">Quick Access</h4>
+                        <div class="space-y-1">
+                            <button class="w-full text-left text-sm text-sand-600 hover:text-terra-600 flex items-center gap-2.5 py-2 px-2 rounded hover:bg-sand-100 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Recent
+                            </button>
+                            <button class="w-full text-left text-sm text-sand-600 hover:text-terra-600 flex items-center gap-2.5 py-2 px-2 rounded hover:bg-sand-100 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                </svg>
+                                Starred
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main: Entity List -->
+            <div class="col-span-9">
+                <!-- Search & Filters -->
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="relative flex-1">
+                        <svg class="w-4 h-4 text-sand-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input type="text" placeholder="Search entities..." class="search-input">
+                    </div>
+                    <select class="btn-secondary text-sm rounded-lg px-3 py-2.5 focus:outline-none cursor-pointer">
+                        <option>Sort: Recent</option>
+                        <option>Sort: Name</option>
+                        <option>Sort: Nodes</option>
+                    </select>
+                    <button class="btn-secondary p-2.5 rounded-lg transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    <button class="btn-secondary p-2.5 rounded-lg transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Entity Table -->
+                <div class="paper-card overflow-hidden">
+                    <!-- Header -->
+                    <div class="grid grid-cols-12 px-5 py-3 bg-gradient-to-b from-sand-100 to-sand-50 border-b border-sand-200 text-xs font-semibold text-sand-500 uppercase tracking-wider">
+                        <div class="col-span-6">Name</div>
+                        <div class="col-span-2">Nodes</div>
+                        <div class="col-span-3">Modified</div>
+                        <div class="col-span-1"></div>
+                    </div>
+
+                    <!-- Rows -->
+                    <div class="entity-row" onclick="openEntity('ml-fundamentals')">
+                        <div class="col-span-6 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-terra-400 to-terra-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                                ML
+                            </div>
+                            <div>
+                                <div class="font-medium text-sand-800">Machine Learning Fundamentals</div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="tag">ml</span>
+                                    <span class="tag">basics</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-2 text-sm text-sand-600">
+                            <span class="font-semibold text-sand-800">24</span> nodes
+                        </div>
+                        <div class="col-span-3 text-sm text-sand-500">2 hours ago</div>
+                        <div class="col-span-1 flex justify-end">
+                            <button class="p-1.5 text-sand-400 hover:text-sand-600 rounded transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="entity-row" onclick="openEntity('neural-networks')">
+                        <div class="col-span-6 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                                NN
+                            </div>
+                            <div>
+                                <div class="font-medium text-sand-800">Neural Networks Deep Dive</div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="tag">neural-net</span>
+                                    <span class="tag">deep-learning</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-2 text-sm text-sand-600">
+                            <span class="font-semibold text-sand-800">18</span> nodes
+                        </div>
+                        <div class="col-span-3 text-sm text-sand-500">1 day ago</div>
+                        <div class="col-span-1 flex justify-end">
+                            <button class="p-1.5 text-sand-400 hover:text-sand-600 rounded transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="entity-row" onclick="openEntity('transformers')">
+                        <div class="col-span-6 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                                TF
+                            </div>
+                            <div>
+                                <div class="font-medium text-sand-800">Attention Is All You Need</div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="tag">transformers</span>
+                                    <span class="tag">attention</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-2 text-sm text-sand-600">
+                            <span class="font-semibold text-sand-800">32</span> nodes
+                        </div>
+                        <div class="col-span-3 text-sm text-sand-500">3 days ago</div>
+                        <div class="col-span-1 flex justify-end">
+                            <button class="p-1.5 text-sand-400 hover:text-sand-600 rounded transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="entity-row" onclick="openEntity('rl-intro')">
+                        <div class="col-span-6 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                                RL
+                            </div>
+                            <div>
+                                <div class="font-medium text-sand-800">Reinforcement Learning: An Introduction</div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="tag">rl</span>
+                                    <span class="tag">sutton</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-2 text-sm text-sand-600">
+                            <span class="font-semibold text-sand-800">45</span> nodes
+                        </div>
+                        <div class="col-span-3 text-sm text-sand-500">1 week ago</div>
+                        <div class="col-span-1 flex justify-end">
+                            <button class="p-1.5 text-sand-400 hover:text-sand-600 rounded transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="entity-row" onclick="openEntity('gans')">
+                        <div class="col-span-6 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                                GA
+                            </div>
+                            <div>
+                                <div class="font-medium text-sand-800">Generative Adversarial Networks</div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="tag">gans</span>
+                                    <span class="tag">generative</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-2 text-sm text-sand-600">
+                            <span class="font-semibold text-sand-800">21</span> nodes
+                        </div>
+                        <div class="col-span-3 text-sm text-sand-500">2 weeks ago</div>
+                        <div class="col-span-1 flex justify-end">
+                            <button class="p-1.5 text-sand-400 hover:text-sand-600 rounded transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex items-center justify-between mt-5 text-sm text-sand-500">
+                    <span>Showing 5 of 12 entities</span>
+                    <div class="flex items-center gap-2">
+                        <button class="btn-secondary px-3 py-1.5 rounded-md disabled:opacity-40" disabled>Previous</button>
+                        <button class="px-3 py-1.5 bg-terra-500 text-white rounded-md text-sm font-medium">1</button>
+                        <button class="btn-secondary px-3 py-1.5 rounded-md">2</button>
+                        <button class="btn-secondary px-3 py-1.5 rounded-md">3</button>
+                        <button class="btn-secondary px-3 py-1.5 rounded-md">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-sand-200 py-6 mt-8">
+        <div class="max-w-7xl mx-auto px-6 text-center text-sand-400 text-sm">
+            <p>Graphex — Transform documents into knowledge</p>
+        </div>
+    </footer>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="fixed inset-0 bg-sand-900/30 backdrop-blur-sm z-50 hidden items-center justify-center">
+        <div class="paper-card w-full max-w-lg mx-4 overflow-hidden fade-in shadow-2xl">
+            <div class="p-6 border-b border-sand-200 bg-gradient-to-b from-sand-50 to-transparent">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-serif font-semibold text-sand-800">Create Knowledge Entity</h3>
+                    <button onclick="closeUploadModal()" class="text-sand-400 hover:text-sand-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <!-- Drop Zone -->
+                <div class="border-2 border-dashed border-sand-300 rounded-lg p-10 text-center hover:border-terra-400 hover:bg-terra-50/30 transition-all cursor-pointer group">
+                    <div class="w-14 h-14 rounded-full bg-sand-100 group-hover:bg-terra-100 flex items-center justify-center mx-auto mb-4 transition-colors">
+                        <svg class="w-7 h-7 text-sand-400 group-hover:text-terra-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                    </div>
+                    <p class="text-sand-700 font-medium mb-1">Drop your PDF here</p>
+                    <p class="text-sm text-sand-400">or click to browse files</p>
+                </div>
+
+                <!-- Divider -->
+                <div class="flex items-center gap-4 my-6">
+                    <div class="flex-1 h-px bg-sand-200"></div>
+                    <span class="text-xs text-sand-400 uppercase tracking-wide">or paste URL</span>
+                    <div class="flex-1 h-px bg-sand-200"></div>
+                </div>
+
+                <input type="text" placeholder="https://arxiv.org/pdf/..." class="search-input pl-4">
+            </div>
+
+            <div class="p-6 bg-sand-50 border-t border-sand-200 flex justify-end gap-3">
+                <button onclick="closeUploadModal()" class="btn-secondary px-4 py-2 rounded-lg text-sm font-medium">Cancel</button>
+                <button class="btn-primary px-5 py-2 rounded-lg text-sm font-medium">
+                    Generate Graph
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectFolder(el, folderId) {
+            document.querySelectorAll('.folder-item').forEach(f => f.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function openEntity(id) {
+            console.log('Opening entity:', id);
+            alert('Opening: ' + id + '\n\n→ Would navigate to Graph + Source split view');
+        }
+
+        function openUploadModal() {
+            document.getElementById('upload-modal').classList.remove('hidden');
+            document.getElementById('upload-modal').classList.add('flex');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('upload-modal').classList.add('hidden');
+            document.getElementById('upload-modal').classList.remove('flex');
+        }
+
+        document.getElementById('upload-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeUploadModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeUploadModal();
+        });
+    </script>
+
+</body>
+</html>

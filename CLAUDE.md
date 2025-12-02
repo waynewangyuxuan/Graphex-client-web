@@ -53,6 +53,7 @@ META/
 
 - React 18 + TypeScript
 - Vite
+- Tailwind CSS (utility-first styling)
 - React Router
 - ReactFlow (graph)
 - react-pdf (PDF viewing)
@@ -77,5 +78,5 @@ npm run lint     # Run linter
 - **Concise messages** - keep it short and descriptive
 
 ```bash
-git add . && git commit -m "add retro button component" && git push
+git add . && git commit -m "add paper card component" && git push
 ```
