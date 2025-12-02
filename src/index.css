@@ -59,7 +59,7 @@
 
   /* Stacked paper effect for sidebar */
   .paper-stack {
-    @apply relative;
+    @apply relative mb-3;
   }
 
   .paper-stack::before,
@@ -68,7 +68,8 @@
     position: absolute;
     left: 4px;
     right: 4px;
-    height: 100%;
+    top: 8px;
+    bottom: -4px;
     background: #F3EBE0;
     border: 1px solid #E6D9C6;
     border-radius: 3px;
@@ -76,11 +77,11 @@
   }
 
   .paper-stack::before {
-    bottom: -4px;
     transform: rotate(0.5deg);
   }
 
   .paper-stack::after {
+    top: 12px;
     bottom: -8px;
     left: 8px;
     right: 8px;
@@ -145,6 +146,10 @@
   .folder-item {
     @apply flex items-center gap-2.5 px-3.5 py-2.5 rounded cursor-pointer transition-all text-sm;
     border: 1px solid transparent;
+  }
+
+  .folder-item .folder-icon {
+    @apply w-4 h-4 shrink-0;
   }
 
   .folder-item:hover {
