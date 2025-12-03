@@ -7,6 +7,7 @@ interface CollectionsSidebarProps {
   onSelectFolder: (folderId: string | null) => void;
   entityCount: number;
   getFolderCount: (folderId: string) => number;
+  onCreateFolder: () => void;
 }
 
 export function CollectionsSidebar({
@@ -15,6 +16,7 @@ export function CollectionsSidebar({
   onSelectFolder,
   entityCount,
   getFolderCount,
+  onCreateFolder,
 }: CollectionsSidebarProps) {
   const rootFolders = folders.filter((f) => f.parentId === null);
 
@@ -22,7 +24,11 @@ export function CollectionsSidebar({
     <div className="paper-card paper-stack p-4 sticky top-24">
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-sand-200">
         <h3 className="text-xs font-semibold text-sand-600 uppercase tracking-widest">Collections</h3>
-        <button className="text-sand-400 hover:text-terra-500 transition-colors" title="New Folder">
+        <button
+          onClick={onCreateFolder}
+          className="text-sand-400 hover:text-terra-500 transition-colors"
+          title="New Folder"
+        >
           <PlusIcon className="w-4 h-4" />
         </button>
       </div>

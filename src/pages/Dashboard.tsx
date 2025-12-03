@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLibraryData, useFilteredEntities, getFolderEntityCount } from '@/hooks';
 import { PlusIcon } from '@/components/icons';
-import { StatsRow, CollectionsSidebar, EntityTable, CreateEntityModal } from '@/components/library';
+import { StatsRow, CollectionsSidebar, EntityTable, CreateEntityModal, CreateFolderModal } from '@/components/library';
 
 type SortOption = 'recent' | 'name' | 'nodes';
 
@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showFolderModal, setShowFolderModal] = useState(false);
 
   const filteredEntities = useFilteredEntities(entities, selectedFolderId, sortBy, searchQuery);
   const totalNodes = entities.reduce((sum, e) => sum + e.stats.nodeCount, 0);
@@ -63,6 +64,7 @@ export default function Dashboard() {
               onSelectFolder={setSelectedFolderId}
               entityCount={entities.length}
               getFolderCount={(folderId) => getFolderEntityCount(entities, folderId)}
+              onCreateFolder={() => { setShowFolderModal(true); }}
             />
           </div>
 
@@ -87,6 +89,15 @@ export default function Dashboard() {
           console.log('Create entity:', data);
         }}
         folders={folders}
+      />
+
+      <CreateFolderModal
+        isOpen={showFolderModal}
+        onClose={() => { setShowFolderModal(false); }}
+        onSubmit={(data) => {
+          // TODO: Call API to create folder, then refetch
+          console.log('Create folder:', data);
+        }}
       />
     </main>
   );
