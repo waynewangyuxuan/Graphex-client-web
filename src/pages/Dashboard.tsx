@@ -9,8 +9,9 @@ export default function Dashboard() {
   const { folders, entities, isLoading, isError, error } = useLibraryData();
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredEntities = useFilteredEntities(entities, selectedFolderId, sortBy);
+  const filteredEntities = useFilteredEntities(entities, selectedFolderId, sortBy, searchQuery);
   const totalNodes = entities.reduce((sum, e) => sum + e.stats.nodeCount, 0);
 
   if (isError) {
@@ -66,7 +67,13 @@ export default function Dashboard() {
 
           {/* Entity List */}
           <div className="col-span-9">
-            <EntityTable entities={filteredEntities} sortBy={sortBy} onSortChange={setSortBy} />
+            <EntityTable
+                entities={filteredEntities}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+              />
           </div>
         </div>
       )}

@@ -59,34 +59,21 @@
 
   /* Stacked paper effect for sidebar */
   .paper-stack {
-    @apply relative mb-3;
+    @apply relative mb-2;
   }
 
-  .paper-stack::before,
-  .paper-stack::after {
+  .paper-stack::before {
     content: '';
     position: absolute;
     left: 4px;
     right: 4px;
-    top: 8px;
-    bottom: -4px;
+    top: 6px;
+    bottom: -3px;
     background: #F3EBE0;
     border: 1px solid #E6D9C6;
     border-radius: 3px;
     z-index: -1;
-  }
-
-  .paper-stack::before {
-    transform: rotate(0.5deg);
-  }
-
-  .paper-stack::after {
-    top: 12px;
-    bottom: -8px;
-    left: 8px;
-    right: 8px;
-    transform: rotate(-0.3deg);
-    background: #EDE4D6;
+    transform: rotate(0.4deg);
   }
 
   /* Buttons */

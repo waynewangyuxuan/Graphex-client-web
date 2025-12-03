@@ -36,14 +36,25 @@ export function useLibraryData() {
 export function useFilteredEntities(
   entities: EntitySummary[],
   selectedFolderId: string | null,
-  sortBy: 'recent' | 'name' | 'nodes'
+  sortBy: 'recent' | 'name' | 'nodes',
+  searchQuery: string = ''
 ) {
   return useMemo(() => {
     let filtered = entities;
 
     // Filter by folder
     if (selectedFolderId !== null) {
-      filtered = entities.filter((e) => e.folderId === selectedFolderId);
+      filtered = filtered.filter((e) => e.folderId === selectedFolderId);
+    }
+
+    // Filter by search query (title or tags)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(
+        (e) =>
+          e.title.toLowerCase().includes(query) ||
+          e.tags.some((tag) => tag.toLowerCase().includes(query))
+      );
     }
 
     // Sort
@@ -62,7 +73,7 @@ export function useFilteredEntities(
     }
 
     return sorted;
-  }, [entities, selectedFolderId, sortBy]);
+  }, [entities, selectedFolderId, sortBy, searchQuery]);
 }
 
 /**

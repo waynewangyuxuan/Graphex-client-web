@@ -9,16 +9,30 @@ interface EntityTableProps {
   entities: EntitySummary[];
   sortBy: SortOption;
   onSortChange: (sort: SortOption) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
-export function EntityTable({ entities, sortBy, onSortChange }: EntityTableProps) {
+export function EntityTable({
+  entities,
+  sortBy,
+  onSortChange,
+  searchQuery,
+  onSearchChange,
+}: EntityTableProps) {
   return (
     <>
       {/* Search & Filters */}
       <div className="flex items-center gap-4 mb-4">
         <div className="relative flex-1">
           <SearchIcon className="w-4 h-4 text-sand-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input type="text" placeholder="Search entities..." className="input pl-10" />
+          <input
+            type="text"
+            placeholder="Search entities..."
+            className="input pl-10"
+            value={searchQuery}
+            onChange={(e) => { onSearchChange(e.target.value); }}
+          />
         </div>
         <Dropdown
           value={sortBy}
