@@ -13,8 +13,25 @@ export default function Dashboard() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredEntities = useFilteredEntities(entities, selectedFolderId, sortBy, searchQuery);
+
+  // Reset to page 1 when filters change
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const handleFolderChange = (folderId: string | null) => {
+    setSelectedFolderId(folderId);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (sort: SortOption) => {
+    setSortBy(sort);
+    setCurrentPage(1);
+  };
   const totalNodes = entities.reduce((sum, e) => sum + e.stats.nodeCount, 0);
 
   if (isError) {
@@ -62,7 +79,7 @@ export default function Dashboard() {
             <CollectionsSidebar
               folders={folders}
               selectedFolderId={selectedFolderId}
-              onSelectFolder={setSelectedFolderId}
+              onSelectFolder={handleFolderChange}
               entityCount={entities.length}
               getFolderCount={(folderId) => getFolderEntityCount(entities, folderId)}
               onCreateFolder={() => { setShowFolderModal(true); }}
@@ -74,11 +91,13 @@ export default function Dashboard() {
             <EntityTable
                 entities={filteredEntities}
                 sortBy={sortBy}
-                onSortChange={setSortBy}
+                onSortChange={handleSortChange}
                 searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
+                onSearchChange={handleSearchChange}
                 selectedIds={selectedIds}
                 onSelectionChange={setSelectedIds}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
               />
           </div>
         </div>

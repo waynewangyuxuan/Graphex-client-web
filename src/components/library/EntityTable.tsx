@@ -5,6 +5,8 @@ import { Dropdown, ContextMenu, type MenuItem } from '@/components/ui';
 
 type SortOption = 'recent' | 'name' | 'nodes';
 
+const PAGE_SIZE = 10;
+
 interface EntityTableProps {
   entities: EntitySummary[];
   sortBy: SortOption;
@@ -13,6 +15,8 @@ interface EntityTableProps {
   onSearchChange: (query: string) => void;
   selectedIds: Set<string>;
   onSelectionChange: (ids: Set<string>) => void;
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }
 
 export function EntityTable({
@@ -23,15 +27,27 @@ export function EntityTable({
   onSearchChange,
   selectedIds,
   onSelectionChange,
+  currentPage,
+  onPageChange,
 }: EntityTableProps) {
-  const allSelected = entities.length > 0 && entities.every((e) => selectedIds.has(e.id));
-  const someSelected = entities.some((e) => selectedIds.has(e.id));
+  const totalPages = Math.ceil(entities.length / PAGE_SIZE);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedEntities = entities.slice(startIndex, startIndex + PAGE_SIZE);
+
+  const allSelected = paginatedEntities.length > 0 && paginatedEntities.every((e) => selectedIds.has(e.id));
+  const someSelected = paginatedEntities.some((e) => selectedIds.has(e.id));
 
   const handleSelectAll = () => {
     if (allSelected) {
-      onSelectionChange(new Set());
+      // Deselect all on current page
+      const next = new Set(selectedIds);
+      paginatedEntities.forEach((e) => { next.delete(e.id); });
+      onSelectionChange(next);
     } else {
-      onSelectionChange(new Set(entities.map((e) => e.id)));
+      // Select all on current page
+      const next = new Set(selectedIds);
+      paginatedEntities.forEach((e) => { next.add(e.id); });
+      onSelectionChange(next);
     }
   };
 
@@ -118,10 +134,10 @@ export function EntityTable({
         </div>
 
         {/* Rows */}
-        {entities.length === 0 ? (
+        {paginatedEntities.length === 0 ? (
           <EmptyState />
         ) : (
-          entities.map((entity) => (
+          paginatedEntities.map((entity) => (
             <EntityRow
               key={entity.id}
               entity={entity}
@@ -135,7 +151,40 @@ export function EntityTable({
       {/* Pagination */}
       {entities.length > 0 && (
         <div className="flex items-center justify-between mt-5 text-sm text-sand-500">
-          <span>Showing {entities.length} entities</span>
+          <span>
+            Showing {startIndex + 1}-{Math.min(startIndex + PAGE_SIZE, entities.length)} of {entities.length} entities
+          </span>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => { onPageChange(currentPage - 1); }}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded border border-sand-200 hover:bg-sand-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => { onPageChange(page); }}
+                  className={`w-8 h-8 rounded transition-colors ${
+                    page === currentPage
+                      ? 'bg-terra-500 text-white'
+                      : 'border border-sand-200 hover:bg-sand-100'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                onClick={() => { onPageChange(currentPage + 1); }}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 rounded border border-sand-200 hover:bg-sand-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       )}
     </>
