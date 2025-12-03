@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFolderModal, setShowFolderModal] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const filteredEntities = useFilteredEntities(entities, selectedFolderId, sortBy, searchQuery);
   const totalNodes = entities.reduce((sum, e) => sum + e.stats.nodeCount, 0);
@@ -76,6 +77,8 @@ export default function Dashboard() {
                 onSortChange={setSortBy}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
+                selectedIds={selectedIds}
+                onSelectionChange={setSelectedIds}
               />
           </div>
         </div>

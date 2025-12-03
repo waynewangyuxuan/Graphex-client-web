@@ -11,6 +11,8 @@ interface EntityTableProps {
   onSortChange: (sort: SortOption) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  selectedIds: Set<string>;
+  onSelectionChange: (ids: Set<string>) => void;
 }
 
 export function EntityTable({
@@ -19,7 +21,29 @@ export function EntityTable({
   onSortChange,
   searchQuery,
   onSearchChange,
+  selectedIds,
+  onSelectionChange,
 }: EntityTableProps) {
+  const allSelected = entities.length > 0 && entities.every((e) => selectedIds.has(e.id));
+  const someSelected = entities.some((e) => selectedIds.has(e.id));
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      onSelectionChange(new Set());
+    } else {
+      onSelectionChange(new Set(entities.map((e) => e.id)));
+    }
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    const next = new Set(selectedIds);
+    if (checked) {
+      next.add(id);
+    } else {
+      next.delete(id);
+    }
+    onSelectionChange(next);
+  };
   return (
     <>
       {/* Search & Filters */}
@@ -45,11 +69,49 @@ export function EntityTable({
         />
       </div>
 
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between px-4 py-3 mb-4 rounded-lg bg-terra-50 border border-terra-200">
+          <span className="text-sm font-medium text-terra-700">
+            {selectedIds.size} {selectedIds.size === 1 ? 'entity' : 'entities'} selected
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { console.log('Move selected:', [...selectedIds]); }}
+              className="btn-secondary text-xs py-1.5 px-3"
+            >
+              Move to Folder
+            </button>
+            <button
+              onClick={() => { console.log('Delete selected:', [...selectedIds]); }}
+              className="btn-secondary text-xs py-1.5 px-3 text-red-600 hover:bg-red-50 hover:border-red-200"
+            >
+              Delete
+            </button>
+            <button
+              onClick={() => { onSelectionChange(new Set()); }}
+              className="text-xs text-sand-500 hover:text-sand-700 px-2"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className="paper-card overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-12 px-5 py-3 bg-gradient-to-b from-sand-100 to-sand-50 border-b border-sand-200 text-xs font-semibold text-sand-500 uppercase tracking-wider">
-          <div className="col-span-6">Name</div>
+        <div className="grid grid-cols-12 px-5 py-3 bg-gradient-to-b from-sand-100 to-sand-50 border-b border-sand-200 text-xs font-semibold text-sand-500 uppercase tracking-wider items-center">
+          <div className="col-span-1 flex items-center">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              ref={(el) => { if (el) el.indeterminate = someSelected && !allSelected; }}
+              onChange={handleSelectAll}
+              className="checkbox"
+            />
+          </div>
+          <div className="col-span-5">Name</div>
           <div className="col-span-2">Nodes</div>
           <div className="col-span-3">Modified</div>
           <div className="col-span-1" />
@@ -59,7 +121,14 @@ export function EntityTable({
         {entities.length === 0 ? (
           <EmptyState />
         ) : (
-          entities.map((entity) => <EntityRow key={entity.id} entity={entity} />)
+          entities.map((entity) => (
+            <EntityRow
+              key={entity.id}
+              entity={entity}
+              isSelected={selectedIds.has(entity.id)}
+              onSelect={(checked) => { handleSelectOne(entity.id, checked); }}
+            />
+          ))
         )}
       </div>
 
@@ -120,15 +189,30 @@ function formatRelativeTime(dateStr: string): string {
   return date.toLocaleDateString();
 }
 
-function EntityRow({ entity }: { entity: EntitySummary }) {
+interface EntityRowProps {
+  entity: EntitySummary;
+  isSelected: boolean;
+  onSelect: (checked: boolean) => void;
+}
+
+function EntityRow({ entity, isSelected, onSelect }: EntityRowProps) {
   const navigate = useNavigate();
 
   return (
     <div
       onClick={() => { navigate(`/entity/${entity.id}`); }}
-      className="entity-row grid-cols-12"
+      className={`entity-row grid-cols-12 ${isSelected ? 'bg-terra-50' : ''}`}
     >
-      <div className="col-span-6 flex items-center gap-3">
+      <div className="col-span-1 flex items-center">
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={(e) => { onSelect(e.target.checked); }}
+          onClick={(e) => { e.stopPropagation(); }}
+          className="checkbox"
+        />
+      </div>
+      <div className="col-span-5 flex items-center gap-3">
         <div
           className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getAvatarColor(entity.id)} flex items-center justify-center text-white text-sm font-semibold shadow-sm`}
         >

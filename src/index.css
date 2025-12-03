@@ -129,6 +129,17 @@
     @apply text-sand-400;
   }
 
+  /* Checkbox */
+  .checkbox {
+    @apply w-4 h-4 rounded cursor-pointer transition-all;
+    accent-color: #C96442;
+  }
+
+  .checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(201, 100, 66, 0.2);
+  }
+
   /* Folder items */
   .folder-item {
     @apply flex items-center gap-2.5 px-3.5 py-2.5 rounded cursor-pointer transition-all text-sm;
