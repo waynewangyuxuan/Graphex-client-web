@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { EntitySummary } from '@/api';
-import { DocumentIcon, MoreIcon, SearchIcon } from '@/components/icons';
-import { Dropdown } from '@/components/ui';
+import { DocumentIcon, MoreIcon, SearchIcon, PencilIcon, TrashIcon, MoveIcon } from '@/components/icons';
+import { Dropdown, ContextMenu, type MenuItem } from '@/components/ui';
 
 type SortOption = 'recent' | 'name' | 'nodes';
 
@@ -236,15 +236,32 @@ function EntityRow({ entity, isSelected, onSelect }: EntityRowProps) {
       </div>
       <div className="col-span-3 text-sm text-sand-500">{formatRelativeTime(entity.modifiedAt)}</div>
       <div className="col-span-1 flex justify-end">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          className="p-1.5 text-sand-400 hover:text-sand-600 rounded transition-colors"
-        >
-          <MoreIcon />
-        </button>
+        <ContextMenu
+          trigger={<MoreIcon />}
+          items={getEntityMenuItems(entity.id, entity.title)}
+        />
       </div>
     </div>
   );
+}
+
+function getEntityMenuItems(entityId: string, entityTitle: string): MenuItem[] {
+  return [
+    {
+      label: 'Rename',
+      icon: <PencilIcon />,
+      onClick: () => { console.log('Rename entity:', entityId, entityTitle); },
+    },
+    {
+      label: 'Move to Folder',
+      icon: <MoveIcon />,
+      onClick: () => { console.log('Move entity:', entityId); },
+    },
+    {
+      label: 'Delete',
+      icon: <TrashIcon />,
+      onClick: () => { console.log('Delete entity:', entityId); },
+      danger: true,
+    },
+  ];
 }

@@ -30,7 +30,7 @@ Major design system overhaul. Moving from Windows 3.1 retro aesthetic to warm "P
 - [x] Create entity modal (button exists, needs modal UI)
 - [x] Create folder modal (button exists, needs modal UI)
 - [x] Multi-select entities (checkbox column, bulk actions)
-- [ ] Context menu on entity row (rename, delete, move)
+- [x] Context menu on entity row (rename, delete, move)
 - [ ] Drag-and-drop entities to folders
 - [ ] Pagination (if entity count grows large)
 
