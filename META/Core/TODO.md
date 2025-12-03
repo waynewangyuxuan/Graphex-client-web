@@ -27,7 +27,7 @@ Major design system overhaul. Moving from Windows 3.1 retro aesthetic to warm "P
 ### Dashboard Enhancements
 - [x] Search functionality (filter entities by title/tags)
 - [x] Sorting (wire up sort dropdown to actually sort entities)
-- [ ] Create entity modal (button exists, needs modal UI)
+- [x] Create entity modal (button exists, needs modal UI)
 - [ ] Create folder modal (button exists, needs modal UI)
 - [ ] Multi-select entities (checkbox column, bulk actions)
 - [ ] Context menu on entity row (rename, delete, move)

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLibraryData, useFilteredEntities, getFolderEntityCount } from '@/hooks';
 import { PlusIcon } from '@/components/icons';
-import { StatsRow, CollectionsSidebar, EntityTable } from '@/components/library';
+import { StatsRow, CollectionsSidebar, EntityTable, CreateEntityModal } from '@/components/library';
 
 type SortOption = 'recent' | 'name' | 'nodes';
 
@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const filteredEntities = useFilteredEntities(entities, selectedFolderId, sortBy, searchQuery);
   const totalNodes = entities.reduce((sum, e) => sum + e.stats.nodeCount, 0);
@@ -33,7 +34,7 @@ export default function Dashboard() {
           <h1 className="text-2xl font-serif font-semibold text-sand-900 mb-1">Knowledge Library</h1>
           <p className="text-sand-500 text-sm">Organize and explore your knowledge entities</p>
         </div>
-        <button className="btn-primary">
+        <button onClick={() => { setShowCreateModal(true); }} className="btn-primary">
           <PlusIcon className="w-4 h-4" />
           New Entity
         </button>
@@ -77,6 +78,16 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <CreateEntityModal
+        isOpen={showCreateModal}
+        onClose={() => { setShowCreateModal(false); }}
+        onSubmit={(data) => {
+          // TODO: Call API to create entity, then refetch
+          console.log('Create entity:', data);
+        }}
+        folders={folders}
+      />
     </main>
   );
 }
